@@ -44,9 +44,9 @@ for i=1:PET_dim(1)
                 m0 = trapz(time_vec, vox_n);
                 Mt0(i,j,k) = m0;
                 
-                % calculate first moment of voxel (mean arrival time)
+                % calculate first moment of voxel 
                 m1 = trapz(time_vec, vox_n.*time_vec);
-                % calculate center of mass of streamtube
+                % calculate center of mass (mean arrival time)
                 xc = m1/m0;
                 Xt(i,j,k) = xc;
                 
