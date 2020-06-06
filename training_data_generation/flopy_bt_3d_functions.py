@@ -32,9 +32,9 @@ except:
 # mpl.rcParams['figure.figsize'] = (8, 8)
 
 # names of executable with path IF NOT IN CURRENT DIRECTORY
-exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
+# exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
 # exe_name_mf = 'mf2005'
-exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
+# exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # # directory to save data
 # directory_name = 'data_3D_model'
@@ -48,7 +48,7 @@ exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executa
 # # print('flopy version: {}'.format(flopy.__version__))
 
 
-def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, nprs, mixelm):
+def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, nprs, mixelm, exe_name_mf, exe_name_mt):
     # # Model workspace and new sub-directory
     # model_ws = os.path.join(workdir, dirname)
     
@@ -360,10 +360,10 @@ def mean_bt_map(conc, grid_size, perlen_mf, timearray):
     # calculate mean arrival time at the outlet
     mean_bt_outlet = np.mean(bt_array[:,:,-1])
     # Calculate velocity from difference in mean arrival time between inlet and outlet
-    model_length = grid_size[2]*conc_size[3]
+    model_length = grid_size[2]*(conc_size[3]-1)
     v = model_length/(mean_bt_outlet - mean_bt_inlet)
     # Now calculate what the mean arrival would be if the velocity was constant everywhere
-    xg = np.arange(0, model_length, grid_size[2])
+    xg = np.arange(0, (model_length+grid_size[2]), grid_size[2]) #+ (grid_size[2]/2)
     # vector of ideal mean arrival time based average v
     bt_ideal = xg/v
 # % shifted
