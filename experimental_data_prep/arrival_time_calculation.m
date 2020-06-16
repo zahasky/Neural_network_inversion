@@ -3,7 +3,7 @@
 % 14/24/2018
 clear all
 close all
-set(0,'DefaultAxesFontSize',14, 'defaultlinelinewidth', 2,...
+set(0,'DefaultAxesFontSize',20, 'defaultlinelinewidth', 2,...
     'DefaultAxesTitleFontWeight', 'normal')
 
 addpath('C:\Users\zahas\Dropbox\Matlab\high_res_images')
@@ -29,7 +29,7 @@ vox_size = [0.2329 0.2329 0.2388];
 % noise threshold
 noise_thresh = 0.003;
 % normalized time (1 = yes, 0 = no)
-norm_time = 1;
+norm_time = 0;
 
 %%%%% END INPUT %%%%%%%%%
 % approx velocity
@@ -83,11 +83,11 @@ Xth = repmat(mean_xt3d, PET_size(1),PET_size(1),1);
 % Arrival time difference map
 Xt_diff = (Xth - Xt);
 
-if norm_time == 1
+% if norm_time == 1
 % normalized
-Xt_diff = Xt_diff.*(v./gridZ(end));
-Xt = Xt.*(v./gridZ(end));
-end
+Xt_diff_norm = Xt_diff.*(v./gridZ(end));
+Xt_norm = Xt.*(v./gridZ(end));
+% end
 
 %% Plot data
 % Plot center half of core mean arrival times
@@ -226,24 +226,25 @@ colormap(gca, arrival_color)
 % end
 
 % Call arrival time calculation function 
-% [Xt, Mt0, St]= arrival_time_calculation_function(conditioned_PET, ...
-%     timestep_length, 0);
-% r = 10;
-% c = 12;
-% figure
-% hold on
-% time_vec = timestep_length.*[1:PET_size(4)]'-(timestep_length/2);
-% cc = gray(40);
-% for i = [2 10 20]
-%     plot(time_vec./60, squeeze(conditioned_PET(r,c,i,:)), '-o', 'color', cc(i,:))
-%     plot([Xt(r,c,i), Xt(r,c,i)]./60, [0 0.1], ':', 'color', cc(i,:))
-% %     pause
-% end
-% box on
-% title('Mean arrival time calculation demo')
-% xlabel('Time [min]')
-% ylabel('Radioactivity [mCi]')
-% set(gca, 'Color', 'none');
-% set(gca,'linewidth',1.1)
-% axis([0 20 0 0.06])
+[Xt, Mt0, St]= arrival_time_calculation_function(conditioned_PET, ...
+    timestep_length, 0);
+r = 10;
+c = 11;
+figure
+hold on
+time_vec = timestep_length.*[1:PET_size(4)]'-(timestep_length/2);
+cc = gray(35);
+for i = [5 15 25]
+    plot(time_vec./60, squeeze(conditioned_PET(r,c,i,:)), '-o', 'color', cc(i,:), 'linewidth', 2.5)
+    plot([Xt(r,c,i), Xt(r,c,i)]./60, [0 0.1], ':', 'color', cc(i,:))
+%     pause
+end
+box on
+fs = 28
+title('Mean breakthrough time', 'fontsize', fs)
+xlabel('Time [min]', 'fontsize', fs)
+ylabel('Radioactivity [mCi]', 'fontsize', fs)
+set(gca, 'Color', 'none');
+set(gca,'linewidth',1.8)
+axis([0 10 0 0.06])
 

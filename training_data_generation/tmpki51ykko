@@ -49,9 +49,9 @@ exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
 exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # directory to save data
-directory_name = 'Tdata_2D_g10k_horz'
+directory_name = 'Tdata_2D'
 # datadir = os.path.join('..', directory_name, 'mt3d_test', 'mt3dms')
-workdir = os.path.join('D:\\training_data', directory_name)
+workdir = os.path.join('.', directory_name)
 
 # uncomment if you want the information about numpy, matplotlib, and flopy printed    
 # print(sys.version)
@@ -60,8 +60,8 @@ workdir = os.path.join('D:\\training_data', directory_name)
 # print('flopy version: {}'.format(flopy.__version__))
 
 # Set path to perm maps
-# perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data_rot')
-perm_field_dir = os.path.join('D:\\training_data\\gauss_fields\\no_rotation')
+perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data_rot')
+
 
 # =============================================================================
 # VARIABLES THAT DON'T CHANGE
@@ -96,7 +96,7 @@ for td in range(1, 10001):
     print('TRAINGING DATASET: ' + str(td))
        
     # Import permeability map
-    tdata_km2 = np.loadtxt(perm_field_dir + '\\tdg_km2_' + str(td) +'.csv', delimiter=',')
+    tdata_km2 = np.loadtxt(perm_field_dir + '\\tdr_km2_' + str(td) +'.csv', delimiter=',')
     
     nrow = int(tdata_km2[-2]) # number of rows / grid cells
     ncol = int(tdata_km2[-1]) # number of columns (parallel to axis of core)
@@ -123,10 +123,10 @@ for td in range(1, 10001):
     # print('Mean bt_diff inlet: ' + str(np.mean(bt_diff_norm[:,:,0])))
     # print('Mean bt_diff outlet: ' + str(np.mean(bt_diff_norm[:,:,-1])))
     
-    # mean_perm = (Lx/100)*mu*u*nrow/dp
+    mean_perm = (Lx/100)*mu*u*nrow/dp
  
-    # print('Pressure-based mean perm: '+ str(mean_perm/9.869233E-13) + ' D')
-    # print('Field-based mean perm: '+ str(np.mean(tdata_km2)/9.869233E-13) + ' D')
+    print('Pressure-based mean perm: '+ str(mean_perm/9.869233E-13) + ' D')
+    print('Field-based mean perm: '+ str(np.mean(tdata_km2)/9.869233E-13) + ' D')
     
     # =============================================================================
     # SAVE DATA 

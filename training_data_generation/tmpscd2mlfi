@@ -90,7 +90,7 @@ mixelm = -1
 # Call function and time it
 start_td = time.time() # start a timer
 
-for td in range(1, 10001):
+for td in range(1, 2):
 # for td in range(10, 11):
     
     print('TRAINGING DATASET: ' + str(td))

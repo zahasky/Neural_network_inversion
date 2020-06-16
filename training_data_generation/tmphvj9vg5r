@@ -14,7 +14,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # import math
-import time
+# import time
 
 # Import custom functions to run flopy stuff, the calls should be structured as:
 # from file import function
@@ -40,18 +40,18 @@ from flopy_bt_3d_functions import mt3d_pulse_injection_sim, mean_bt_map
 
 ## LAPTOP PATHS
 # names of executable with path IF NOT IN CURRENT DIRECTORY
-# exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
-# exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
+exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
+exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # DELL 419 PATHS
 # names of executable with path IF NOT IN CURRENT DIRECTORY
-exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
-exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
+# exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
+# exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # directory to save data
-directory_name = 'Tdata_2D_g10k_horz'
+directory_name = 'Tdata_2D'
 # datadir = os.path.join('..', directory_name, 'mt3d_test', 'mt3dms')
-workdir = os.path.join('D:\\training_data', directory_name)
+workdir = os.path.join('.', directory_name)
 
 # uncomment if you want the information about numpy, matplotlib, and flopy printed    
 # print(sys.version)
@@ -60,8 +60,8 @@ workdir = os.path.join('D:\\training_data', directory_name)
 # print('flopy version: {}'.format(flopy.__version__))
 
 # Set path to perm maps
-# perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data_rot')
-perm_field_dir = os.path.join('D:\\training_data\\gauss_fields\\no_rotation')
+perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data_rot')
+
 
 # =============================================================================
 # VARIABLES THAT DON'T CHANGE
@@ -87,16 +87,14 @@ perlen_mf = [1., 20]
 # Numerical method flag
 mixelm = -1
 
-# Call function and time it
-start_td = time.time() # start a timer
 
-for td in range(1, 10001):
+for td in range(1, 10):
 # for td in range(10, 11):
     
-    print('TRAINGING DATASET: ' + str(td))
+    print('Current training dataset: ' + str(td))
        
     # Import permeability map
-    tdata_km2 = np.loadtxt(perm_field_dir + '\\tdg_km2_' + str(td) +'.csv', delimiter=',')
+    tdata_km2 = np.loadtxt(perm_field_dir + '\\tdr_km2_' + str(td) +'.csv', delimiter=',')
     
     nrow = int(tdata_km2[-2]) # number of rows / grid cells
     ncol = int(tdata_km2[-1]) # number of columns (parallel to axis of core)
@@ -123,10 +121,10 @@ for td in range(1, 10001):
     # print('Mean bt_diff inlet: ' + str(np.mean(bt_diff_norm[:,:,0])))
     # print('Mean bt_diff outlet: ' + str(np.mean(bt_diff_norm[:,:,-1])))
     
-    # mean_perm = (Lx/100)*mu*u*nrow/dp
+    mean_perm = (Lx/100)*mu*u*nrow/dp
  
-    # print('Pressure-based mean perm: '+ str(mean_perm/9.869233E-13) + ' D')
-    # print('Field-based mean perm: '+ str(np.mean(tdata_km2)/9.869233E-13) + ' D')
+    print('Pressure-based mean perm: '+ str(mean_perm) + ' m^2')
+    print('Field-based mean perm: '+ str(np.mean(tdata_km2)) + ' m^2')
     
     # =============================================================================
     # SAVE DATA 
@@ -152,10 +150,6 @@ for td in range(1, 10001):
             print ("Error: %s - %s." % (e.filename, e.strerror))
 
 
-# Print final run time
-end_td = time.time() # end timer
-print('Minutes to run 10,000 training simulations: ', (end_td - start_td)/60) # show run time
-    
 # =============================================================================
 # PLOT DATA 
 # =============================================================================

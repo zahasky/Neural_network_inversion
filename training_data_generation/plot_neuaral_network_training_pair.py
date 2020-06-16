@@ -12,13 +12,15 @@ import matplotlib.pyplot as plt
 
 
 # training data iteration
-td = 400
+td = 2603
 
 
 # layer to plot
 ilayer = 0
 # fontsize
 fs = 18
+hfont = {'fontname':'Arial'}
+
 # number of layers 
 nlay = 1
 # Grid cell size
@@ -29,12 +31,12 @@ grid_size = [0.25, 0.25, 0.25] # selected units [cm]
 # LOAD SELECTED EXAMPLE DATA 
 # =============================================================================
 # Set path to perm maps
-perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data')
+perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data_rot')
 
 # Set path to training data output
-workdir = os.path.join('.', 'Tdata_2D')
+workdir = os.path.join('.', 'Tdata_2D\\td_5000_rot')
 # Import permeability map
-tdata_km2 = np.loadtxt(perm_field_dir + '\\td_km2_' + str(td) +'.csv', delimiter=',')
+tdata_km2 = np.loadtxt(perm_field_dir + '\\tdr_km2_' + str(td) +'.csv', delimiter=',')
 
 nrow = int(tdata_km2[-2]) # number of rows / grid cells
 ncol = int(tdata_km2[-1]) # number of columns (parallel to axis of core)
@@ -69,12 +71,12 @@ ax0 = fig1.add_subplot(1, 2, 1, aspect='equal')
 imp = plt.pcolor(x, y, raw_km2[0,:,:], cmap='gray', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 # plt.clim(0,1) 
-cbar.set_label('[m^2]', fontsize=fs)
+cbar.set_label('[m^2]', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
-ax0.set_xlabel('Distance from inlet [cm]', fontsize=fs)
-plt.ylabel('Distance [cm]', fontsize=fs)
-plt.title('Training Data #' + str(td) + ' Permeability Map', fontsize=fs+2)
+ax0.set_xlabel('Distance from inlet [cm]', fontsize=fs, **hfont)
+plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
+plt.title('Training Data #' + str(td) + ' Permeability Map', fontsize=fs+2, **hfont)
 
 ax2 = fig1.add_subplot(1, 2, 2, aspect='equal')
 imp = plt.pcolor(x, y, tdata_ex[ilayer,:,:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
