@@ -161,7 +161,7 @@ for epoch in range(1,nepochs+1):
 
     print(
         "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f /G_A loss: %f/ G_C loss: %f]"
-        % (epoch, 50, i, len(dataloader_input), d_loss.item(), g_loss.item(), g_loss_a.item(), g_loss_c.item())
+        % (epoch, 50, i+1, len(dataloader_input), d_loss.item(), g_loss.item(), g_loss_a.item(), g_loss_c.item())
     )
 
 
