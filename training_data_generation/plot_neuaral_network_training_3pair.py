@@ -38,14 +38,14 @@ grid_size = [0.25, 0.25, 0.25] # selected units [cm]
 # =============================================================================
 def get_perm_and_btmap(td): # Set path to perm maps
     ilayer = 0;
-    # perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data_rot')
-    perm_field_dir = os.path.join('D:\\training_data\\gauss_fields\\no_rotation')
+    perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data')
+    # perm_field_dir = os.path.join('D:\\training_data\\gauss_fields\\no_rotation')
     
     # Set path to training data output
-    # workdir = os.path.join('.', 'Tdata_2D\\td_10k_rot')
-    workdir = os.path.join('D:\\training_data\\Tdata_2D_g10k_horz')
+    workdir = os.path.join('.', 'Tdata_2D\\td_1000')
+    # workdir = os.path.join('D:\\training_data\\Tdata_2D_g10k_horz')
     # Import permeability map
-    tdata_km2 = np.loadtxt(perm_field_dir + '\\tdg_km2_' + str(td) +'.csv', delimiter=',')
+    tdata_km2 = np.loadtxt(perm_field_dir + '\\td_km2_' + str(td) +'.csv', delimiter=',')
     
     nrow = int(tdata_km2[-2]) # number of rows / grid cells
     ncol = int(tdata_km2[-1]) # number of columns (parallel to axis of core)
@@ -79,7 +79,7 @@ def get_perm_and_btmap(td): # Set path to perm maps
 # =============================================================================
 # PLOT DATA 
 # =============================================================================
-td = 9
+td = 8
 
 perm_field, bt_field, ncol, nrow = get_perm_and_btmap(td)
 # Define grid    
@@ -118,7 +118,7 @@ ax2.tick_params(axis='both', which='major', labelsize=fs)
 plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
 plt.title('Breakthrough time difference', fontsize=fs+2, **hfont)
 
-td = 4032
+td = 20
 perm_field, bt_field, ncol, nrow = get_perm_and_btmap(td)
 ax0 = fig1.add_subplot(2, 3, 2, aspect='equal')
 imp = plt.pcolor(x, y, perm_field, cmap='gray', edgecolors='k', linewidths=0.2)
@@ -143,7 +143,7 @@ ax2.tick_params(axis='both', which='major', labelsize=fs)
 # plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
 plt.title('Breakthrough time difference', fontsize=fs+2, **hfont)
 
-td = 8017
+td = 800
 perm_field, bt_field, ncol, nrow = get_perm_and_btmap(td)
 ax0 = fig1.add_subplot(2, 3, 3, aspect='equal')
 imp = plt.pcolor(x, y, perm_field, cmap='gray', edgecolors='k', linewidths=0.2)
