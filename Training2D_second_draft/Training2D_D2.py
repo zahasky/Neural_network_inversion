@@ -3,12 +3,12 @@ import torchvision
 import numpy as np
 import math
 import os
-import CAAE_models
+import CAAE_D2
 import itertools
 
 from torch.autograd import Variable
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, MultiStepLR
-from CAAE_models import Encoder, Decoder, Discriminator
+from CAAE_D2 import Encoder, Decoder, Discriminator
 from torch.utils.data import Dataset, DataLoader
 
 
@@ -25,9 +25,14 @@ class TrainDataset(Dataset):
          input_list = []
          # number of layers
          nlay = 1
-
-         perm_field_dir = os.path.join('.', 'matlab_perm_fields/k_training_data')
-         workdir = os.path.join('.', 'Tdata_2D')
+         
+         # Chris laptop path
+         # perm_field_dir = os.path.join('C:\\Users\\zahas\\Dropbox\\Matlab\\Deep_learning_computer_vision\\Neural_network_inversion\\training_data_generation\\matlab_perm_fields\\k_training_data')
+         # workdir = os.path.join('C:\\Users\\zahas\\Dropbox\\Matlab\\Deep_learning_computer_vision\\Neural_network_inversion\\training_data_generation\\Tdata_2D\\td_1000')
+         
+         # zitong path
+          perm_field_dir = os.path.join('.', 'matlab_perm_fields/k_training_data')
+          workdir = os.path.join('.', 'Tdata_2D')
 
          #use existing permeability maps as labels
          for i in td:
