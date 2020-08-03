@@ -16,20 +16,20 @@
 % You should have received a copy of the GNU General Public License
 % along with GRFS. If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-clear
-reset(RandStream.getGlobalStream);
+clear all
+reset(RandStream.getGlobalStream)
 % physics
-Lx  = 100;              % domain size in x     
-Ly  = 100;              % domain size in y
+Lx  = 20;              % domain size in x     
+Ly  = 20;              % domain size in y
 Lz  = 100;              % domain size in z
 sf  = 1;                % standard deviation
-If  = 5.0;              % correlation lengths in [x,y,z]
+If  = 10.0;              % correlation lengths in [x,y,z]
 % numerics
 Nh  = 5000;             % inner parameter, number of harmonics
 k_m = 100;              % maximum value of the wave number
-nx  = 64;               % numerical grid resolution in x
-ny  = 64;               % numerical grid resolution in y
-nz  = 64;               % numerical grid resolution in z
+nx  = 20;               % numerical grid resolution in x
+ny  = 20;               % numerical grid resolution in y
+nz  = 80;               % numerical grid resolution in z
 dx  = Lx/nx;            % numerical grid step size in x
 dy  = Ly/ny;            % numerical grid step size in y
 dz  = Lz/nz;            % numerical grid step size in z
@@ -70,6 +70,9 @@ end
 Yf = C*Yf;
 toc
 % visu
-figure(1),clf
-slice(Yf,fix(nx/2),fix(ny/2),fix(nz/2)),shading flat,axis image,colorbar
-drawnow
+figure
+slice(Yf,fix(nx/2),fix(ny/2),fix(nz/2))
+shading flat
+axis image
+colorbar
+

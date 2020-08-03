@@ -82,10 +82,10 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # Model information (true in all models called by 'p01')
     nlay = hk_size[0] # number of layers / grid cells
     nrow = hk_size[1] # number of rows / grid cells
-    ncol = hk_size[2]+2 # number of columns (parallel to axis of core)
-    delr = grid_size[0] # grid size in direction of Lx
-    delc = grid_size[1] # grid size in direction of Ly
-    delv = grid_size[2] # grid size in direction of Lz
+    ncol = hk_size[2]+2 # number of columns (along to axis of core)
+    delv = grid_size[0] # grid size in direction of Lx (nlay)
+    delr = grid_size[1] # grid size in direction of Ly (nrow)
+    delc = grid_size[2] # grid size in direction of Lz (ncol)
     
     laytyp = 0
     # cell elevations are specified in variable BOTM. A flat layer is indicated
@@ -93,7 +93,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     botm = [-delv * k for k in range(1, nlay + 1)]
     
     # ADDITIONAL MATERIAL PROPERTIES
-    prsity = 0.3 # porosity. float or array of floats (nlay, nrow, ncol)
+    prsity = 0.25 # porosity. float or array of floats (nlay, nrow, ncol)
     al = 0.1 # longitudental dispersivity
     trpt = 0.3 # ratio of horizontal transverse dispersivity to longitudenal dispersivity
     trpv = 0.3 # ratio of vertical transverse dispersivity to longitudenal dispersivity
