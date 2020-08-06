@@ -90,7 +90,7 @@ mixelm = -1
 # Call function and time it
 start_td = time.time() # start a timer
 
-for td in range(1, 2):
+for td in range(8, 9):
     
     print('TRAINING DATASET: ' + str(td))
        
@@ -101,12 +101,13 @@ for td in range(1, 2):
     nrow = int(tdata_km2[-2]) # number of columns 
     ncol = int(tdata_km2[-1]) # number of slices (parallel to axis of core)
     tdata_km2 = tdata_km2[0:-3]
-    raw_km2 = tdata_km2.reshape(nlay, nrow, ncol, order='F')
+    # raw_km2 = tdata_km2.reshape(nlay, nrow, ncol, order='F') # this is the command needed if data isn't permuted before converting from matrix to vector in matlab
+    raw_km2 = tdata_km2.reshape(nlay, nrow, ncol)
     # Convert permeabiltiy (in m^2) to hydraulic conductivity in cm/min
     raw_hk = raw_km2*(1000*9.81*100*60/8.9E-4)
     # Describe grid for results    
-    Lx = (ncol - 1) * grid_size[2]   # length of model in selected units 
-    Ly = (nrow - 1) * grid_size[1]   # length of model in selected units 
+    Lx = (ncol) * grid_size[2]   # length of model in selected units 
+    Ly = (nrow) * grid_size[1]   # length of model in selected units 
     
     # Model workspace and new sub-directory
     model_dirname = ('td'+ str(td))
@@ -204,7 +205,7 @@ cbar = plt.colorbar()
 plt.clim(0,1) 
 cbar.set_label('Solute concentration', fontsize=fs)
 cbar.ax.tick_params(labelsize= (fs-2)) 
-ax1.tick_params(axis='both', which='major', labelsize=fs)
+ax2.tick_params(axis='both', which='major', labelsize=fs)
 plt.title('Time: %1.1f min' %timearray[60], fontsize=fs+2)
 
 

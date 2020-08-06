@@ -126,6 +126,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # inlet conditions (currently set with well so inlet is zero)
     # ibound[:, :, 0] = -1
     # outlet conditions
+    # ibound[5:15, 5:15, -1] = -1
     ibound[:, :, -1] = -1
     
     # MODFLOW constant initial head conditions
@@ -137,6 +138,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
         if lenuni == 2: 
             hout = bp_kpa*1000/(1000*9.81)
     # assign outlet pressure as head converted from 'bp_kpa' input variable
+    # strt[5:15, 5:15, -1] = hout
     strt[:, :, -1] = hout
     
     # Stress period well data for MODFLOW. Each well is defined through defintition
@@ -146,6 +148,8 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # Nested loop to define every inlet face grid cell as a well
     for layer in range(0, nlay):
         for row in range(0, nrow):
+    # for layer in range(5, 15):
+    #     for row in range(5, 15):
             index_n = layer*nrow + row
             # print(index_n)
             well_info[index_n] = [layer, row, 0, q]   
