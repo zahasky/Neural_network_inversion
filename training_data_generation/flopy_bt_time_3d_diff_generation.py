@@ -51,7 +51,7 @@ exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executa
 # directory to save data
 directory_name = 'Tdata_3D_10k'
 # datadir = os.path.join('..', directory_name, 'mt3d_test', 'mt3dms')
-workdir = os.path.join('.', '3D_fields\\GRFS_v2', directory_name)
+workdir = os.path.join('.', '3D_fields', directory_name)
 # workdir = os.path.join('D:\\training_data', directory_name)
 
 # uncomment if you want the information about numpy, matplotlib, and flopy printed    
@@ -61,7 +61,7 @@ workdir = os.path.join('.', '3D_fields\\GRFS_v2', directory_name)
 # print('flopy version: {}'.format(flopy.__version__))
 
 # Set path to perm maps
-perm_field_dir = os.path.join('.', '3D_fields\\GRFS_v2')
+perm_field_dir = os.path.join('.', '3D_fields')
 # perm_field_dir = os.path.join('D:\\training_data\\gauss_fields\\no_rotation')
 
 # =============================================================================
@@ -90,7 +90,7 @@ mixelm = -1
 # Call function and time it
 start_td = time.time() # start a timer
 
-for td in range(8, 9):
+for td in range(1, 2):
     
     print('TRAINING DATASET: ' + str(td))
        
@@ -132,16 +132,27 @@ for td in range(8, 9):
     # =============================================================================
     # SAVE DATA 
     # =============================================================================
-    # save file name and short path
-    save_filename_sp = workdir + '\\' + model_dirname + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
+    # save normalized breakthrough data
+    save_filename_sp = workdir + '\\' + 'norm_' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
     save_data = np.append(bt_diff_norm.flatten('C'), [dp, Lx])
     np.savetxt(save_filename_sp, save_data, delimiter=',')
+    
+    # save unnormalized breakthrough data
+    save_filename_sp2 = workdir + '\\' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
+    save_data = np.append(bt_array.flatten('C'), [dp, Lx])
+    np.savetxt(save_filename_sp2, save_data, delimiter=',')
     
     tdata_ex = np.loadtxt(save_filename_sp, delimiter=',')
     load_lx = tdata_ex[-1]
     load_dp = tdata_ex[-2]
     tdata_ex = tdata_ex[0:-2]
     tdata_ex = tdata_ex.reshape(nlay, nrow, ncol)
+    
+    tdata_ex2 = np.loadtxt(save_filename_sp2, delimiter=',')
+    load_lx = tdata_ex2[-1]
+    load_dp = tdata_ex2[-2]
+    tdata_ex2 = tdata_ex2[0:-2]
+    tdata_ex2 = tdata_ex2.reshape(nlay, nrow, ncol)
     
     # Try to delete the previous folder of MODFLOW and MT3D files
     if td > 1:
@@ -223,7 +234,7 @@ ax0.tick_params(axis='both', which='major', labelsize=fs)
 plt.title('Pressure Drop', fontsize=fs+2)
 
 ax1 = fig2.add_subplot(3, 1, 2, aspect='equal')
-imp = plt.pcolor(x, y, bt_array[ilayer,:,:], cmap='YlGn', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, tdata_ex2[ilayer,:,:], cmap='YlGn', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 # plt.clim(0,1) 
 cbar.set_label('Time [min]', fontsize=fs)
