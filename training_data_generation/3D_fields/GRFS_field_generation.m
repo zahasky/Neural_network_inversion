@@ -28,7 +28,7 @@ F.nx  = 20;               % numerical grid resolution in x
 F.ny  = 20;               % numerical grid resolution in y
 F.nz  = 40;               % numerical grid resolution in z
 
-for i = 1:5 %length(Rm)
+for i = 1:1 %length(Rm)
     
     % Correlation length
     F.If  = [Rm(i,1), Rm(i,2), Rm(i,3)]; % correlation lengths in [x,y,z]
@@ -61,9 +61,9 @@ for i = 1:5 %length(Rm)
     % F_matt = Yfs_m2';
     
     % Save to csv
-    filename = ['td_3dk_m2_', num2str(i), '.csv'];
-    Yfs_m2 = permute(Yfs_m2,[3 2 1]);
-    csvwrite(filename, [Yfs_m2(:); F.nx; F.ny; F.nz])
+%     filename = ['td_3dk_m2_', num2str(i), '.csv'];
+%     Yfs_m2 = permute(Yfs_m2,[3 2 1]);
+%     csvwrite(filename, [Yfs_m2(:); F.nx; F.ny; F.nz])
     
     figure
     imagesc(squeeze(Yfs(10,:,:)))
@@ -90,17 +90,17 @@ end
 % set(gca,'Ydir','normal')
 
 %% 3D plot for inspection
-% figure
-% subplot(1,2,1)
-% slice(Yf,fix(F.ny/2),fix(F.nx/2),fix(F.nz/2))
-% title('Unscaled Field')
-% shading flat
-% axis image
-% colorbar
-%
-% subplot(1,2,2)
-% slice(Yfs,fix(F.ny/2),fix(F.nx/2),fix(F.nz/2))
-% title('Scaled Field')
-% shading flat
-% axis image
-% colorbar
+figure
+subplot(1,2,1)
+slice(Yf,fix(F.ny/2),fix(F.nx/2),fix(F.nz/2))
+title('Unscaled Field')
+shading flat
+axis image
+colorbar
+
+subplot(1,2,2)
+slice(Yfs,fix(F.ny/2),fix(F.nx/2),fix(F.nz/2))
+title('Scaled Field')
+shading flat
+axis image
+colorbar
