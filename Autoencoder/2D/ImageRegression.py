@@ -66,7 +66,7 @@ class TrainDataset(Dataset):
 # --------------------------------
 #  Initializing Training Datasets
 # --------------------------------
-# #initialize dataset object
+##initialize dataset object
 dataset = TrainDataset()
 dataset_input = dataset[0:10000]
 dataloader_input = DataLoader(dataset=dataset_input, batch_size=50, shuffle=True, num_workers=2)
@@ -178,15 +178,3 @@ decoder_dir = result_dir + '/decoder_epoch{}.pth'.format(nepochs)
 
 torch.save(decoder.state_dict(), decoder_dir)
 torch.save(encoder.state_dict(), encoder_dir)
-
-print(g_l)
-print(g_lc)
-print(g_lk_row)
-print(g_lk_col)
-
-inp_img = imgs_inp[0][0]
-latent_img = encoded_imgs[0][0]
-dec_img = decoded_imgs[0][0]
-print(inp_img)
-print(latent_img)
-print(dec_img)
