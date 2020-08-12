@@ -1,3 +1,5 @@
+#This file is used to load the trained .pth files.
+#The results of the encoder and decoder will be plotted.
 import torch
 import torchvision
 import numpy as np
@@ -13,6 +15,7 @@ from torch.nn import functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, MultiStepLR
 from torch.utils.data import Dataset, DataLoader
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 # ----------------
 #  Dataset Object
