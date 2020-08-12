@@ -3,14 +3,14 @@ import torchvision
 import numpy as np
 import math
 import os
-import CAAE
+import ED
 import itertools
 import matplotlib.pyplot as plt
 
 from torch.autograd import Variable
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, MultiStepLR
-from CAAE import Encoder, Decoder
+from ED import Encoder, Decoder
 from torch.utils.data import Dataset, DataLoader
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
