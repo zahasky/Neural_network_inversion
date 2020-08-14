@@ -20,7 +20,6 @@ import time
 # from file import function
 from flopy_bt_3d_functions import mt3d_pulse_injection_sim, mean_bt_map
 
-
 # # run installed version of flopy or add local path
 # try:
 #     import flopy
@@ -28,15 +27,6 @@ from flopy_bt_3d_functions import mt3d_pulse_injection_sim, mean_bt_map
 #     fpth = os.path.abspath(os.path.join('..', '..'))
 #     sys.path.append(fpth)
 #     import flopy
-    
-# from flopy.utils.util_array import read1d
-
-# set figure size, call mpl.rcParams to see all variables that can be changed
-# mpl.rcParams['figure.figsize'] = (8, 8)
-
-## CD paths
-# exe_name_mf = 'mf2005'
-# exe_name_mt = 'mt3dms'
 
 ## LAPTOP PATHS
 # names of executable with path IF NOT IN CURRENT DIRECTORY
@@ -61,29 +51,34 @@ workdir = os.path.join('.', '3D_fields', directory_name)
 # print('flopy version: {}'.format(flopy.__version__))
 
 # Set path to perm maps
-perm_field_dir = os.path.join('.', '3D_fields')
+perm_field_dir = os.path.join('.', '3D_fields\\Examples')
 # perm_field_dir = os.path.join('D:\\training_data\\gauss_fields\\no_rotation')
+
+# Import core shape mask
+core_mask = np.loadtxt('core_template.csv', delimiter=',')
+# raw_km2 = tdata_km2.reshape(nlay, nrow, ncol, order='F') # this is the command needed if data isn't permuted before converting from matrix to vector in matlab
+core_mask = core_mask.reshape(20, 20)
 
 # =============================================================================
 # VARIABLES THAT DON'T CHANGE
 # =============================================================================
 # grid_size = [grid size in direction of Lx (layer thickness), 
     # Ly (left to right axis when looking down the core), Lz (long axis of core)]
-grid_size = [0.25, 0.25, 0.25] # selected units [cm]
+grid_size = [0.23291, 0.23291, 0.2388] # selected units [cm]
 # Output control for MT3dms
 # nprs (int):  the frequency of the output. If nprs > 0 results will be saved at 
 # the times as specified in timprs (evenly allocated between 0 and sim run length); 
 # if nprs = 0, results will not be saved except at the end of simulation; if NPRS < 0, simulation results will be 
 # saved whenever the number of transport steps is an even multiple of nprs. (default is 0).
-nprs = 200
+nprs = 120
 # viscosity of water in pascal
-mu = 8.9e-4 # [pa.s]
-# Injection flux per cell
-q = 0.024669065517374814 # [cm/min]
-u = q/60/100 #[m/sec]
+# mu = 8.9e-4 # [pa.s]
+# # Injection flux per cell
+# q = 0.024669065517374814 # [cm/min]
+# u = q/60/100 #[m/sec]
     
 # period length in selected units (for steady state flow it can be set to anything)
-perlen_mf = [1., 20]
+perlen_mf = [2., 80]
 # Numerical method flag
 mixelm = -1
 
@@ -105,6 +100,11 @@ for td in range(1, 2):
     raw_km2 = tdata_km2.reshape(nlay, nrow, ncol)
     # Convert permeabiltiy (in m^2) to hydraulic conductivity in cm/min
     raw_hk = raw_km2*(1000*9.81*100*60/8.9E-4)
+    # if defined, set permeability values outside of core to zero with core mask
+    if 'core_mask' in locals():
+        for col in range(ncol):
+            raw_hk[:,:,col] = np.multiply(raw_hk[:,:,col], core_mask)
+    
     # Describe grid for results    
     Lx = (ncol) * grid_size[2]   # length of model in selected units 
     Ly = (nrow) * grid_size[1]   # length of model in selected units 
@@ -124,7 +124,6 @@ for td in range(1, 2):
     # print('Mean bt_diff inlet: ' + str(np.mean(bt_diff_norm[:,:,0])))
     # print('Mean bt_diff outlet: ' + str(np.mean(bt_diff_norm[:,:,-1])))
     
-    # mean_perm = (Lx/100)*mu*u*nrow/dp
  
     # print('Pressure-based mean perm: '+ str(mean_perm/9.869233E-13) + ' D')
     # print('Field-based mean perm: '+ str(np.mean(tdata_km2)/9.869233E-13) + ' D')
@@ -133,12 +132,12 @@ for td in range(1, 2):
     # SAVE DATA 
     # =============================================================================
     # save normalized breakthrough data
-    save_filename_sp = workdir + '\\' + 'norm_' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
+    save_filename_sp = workdir + '\\' + 'norm_' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'test.csv'
     save_data = np.append(bt_diff_norm.flatten('C'), [dp, Lx])
     np.savetxt(save_filename_sp, save_data, delimiter=',')
     
     # save unnormalized breakthrough data
-    save_filename_sp2 = workdir + '\\' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
+    save_filename_sp2 = workdir + '\\' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'test.csv'
     save_data = np.append(bt_array.flatten('C'), [dp, Lx])
     np.savetxt(save_filename_sp2, save_data, delimiter=',')
     
@@ -211,13 +210,13 @@ ax1.tick_params(axis='both', which='major', labelsize=fs)
 plt.title('Time: %1.1f min' %timearray[30], fontsize=fs+2)
 
 ax2 = fig1.add_subplot(3, 1, 3, aspect='equal')
-imp = plt.pcolor(x, y, conc[60,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, conc[45,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,1) 
 cbar.set_label('Solute concentration', fontsize=fs)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax2.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f min' %timearray[60], fontsize=fs+2)
+plt.title('Time: %1.1f min' %timearray[45], fontsize=fs+2)
 
 
 

@@ -2,8 +2,8 @@
 % Christopher Zahasky
 % 14/24/2018
 clear all
-close all
-set(0,'DefaultAxesFontSize',20, 'defaultlinelinewidth', 2,...
+% close all
+set(0,'DefaultAxesFontSize',17, 'defaultlinelinewidth', 2,...
     'DefaultAxesTitleFontWeight', 'normal')
 
 addpath('C:\Users\zahas\Dropbox\Matlab\high_res_images')
@@ -11,17 +11,30 @@ arrival_color = cbrewer('seq', 'YlGn', 60 , 'linear');
 velo_color = flipud(cbrewer('div', 'RdYlBu', 60 , 'linear'));
 
 % Load data
-addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\BH21\bh21_pet_figure')
-load('BH21_4ml_coarse_cropped')
-% timestep length in seconds
-timestep_length = 40;
+% Navajo Sandstone
+% addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\BH21\bh21_pet_figure')
+% load('BH21_4ml_coarse_cropped')
+% % timestep length in seconds
+% timestep_length = 40;
+% injected pulse volume [mL]
+% inj_pv = 4;
+
+% Berea
 % addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\BSS_c1\june_17_pet\6_12_single_phase')
 % load('BSS_c1_2ml_2_3mm_vox')
 % timestep length in seconds
 % timestep_length = 60;
-
 % injected pulse volume [mL]
-inj_pv = 4;
+% inj_pv = 4;
+
+% Bentheimer
+addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\Bentheimer_imperial')
+load('Bentheimer_4ml_2_3mm_vox')
+% timestep length in seconds
+timestep_length = 47;
+% injected pulse volume [mL]
+inj_pv = 2;
+
 % flow rate [mL/min]
 q = 4;
 % Image voxel size
@@ -29,7 +42,7 @@ vox_size = [0.2329 0.2329 0.2388];
 % noise threshold
 noise_thresh = 0.003;
 % normalized time (1 = yes, 0 = no)
-norm_time = 0;
+norm_time = 1;
 
 %%%%% END INPUT %%%%%%%%%
 % approx velocity
@@ -91,7 +104,11 @@ Xt_norm = Xt.*(v./gridZ(end));
 
 %% Plot data
 % Plot center half of core mean arrival times
-slice_plane = squeeze(Xt);
+if norm_time == 1
+    slice_plane = squeeze(Xt_norm);
+else
+    slice_plane = squeeze(Xt);
+end
 slice_plane(1:end,11:end,:) = nan;
 slice_plane = flip(slice_plane);
 slice_plane = flip(slice_plane,2);
@@ -106,7 +123,7 @@ end
 figure('position', [274         432        1492         420])
 subplot(1,2,1)
 PATCH_3Darray(slice_plane, gridZ, gridY, gridX, arrival_color, clim, 'col')
-title(['Tracer mean arrival time map'],'FontWeight', 'Normal')
+title(['Tracer mean breakthrough time map'],'FontWeight', 'Normal')
 % format figure
 axis equal
 axis([0 10 max(gridY)/2 max(gridY)+0.1 0 max(gridX)])
@@ -132,14 +149,18 @@ end
 subplot(1,2,2)
 
 % Plot center half of core mean arrival times
-flow_slice_plane = Xt_diff;
+if norm_time == 1
+    flow_slice_plane = Xt_diff_norm;
+else
+    flow_slice_plane = Xt_diff;
+end
 flow_slice_plane(1:end,11:end,:) = nan;
 flow_slice_plane = flip(flow_slice_plane);
 flow_slice_plane = flip(flow_slice_plane,2);
 flow_slice_plane = permute(flow_slice_plane,[3 2 1]);
 
 PATCH_3Darray(flow_slice_plane, gridZ, gridY, gridX, velo_color, 'col')
-title(['Arrival time difference map'],'FontWeight', 'Normal')
+title(['Breakthrough time difference map'],'FontWeight', 'Normal')
 
 axis equal
 axis([0 10 max(gridY)/2 max(gridY)+0.1 0 max(gridX)])
@@ -229,7 +250,7 @@ colormap(gca, arrival_color)
 [Xt, Mt0, St]= arrival_time_calculation_function(conditioned_PET, ...
     timestep_length, 0);
 r = 10;
-c = 11;
+c = 9;
 figure
 hold on
 time_vec = timestep_length.*[1:PET_size(4)]'-(timestep_length/2);

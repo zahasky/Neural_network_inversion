@@ -15,7 +15,7 @@ import os
 import numpy as np
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt
-import math
+# import math
 import time
 
 # run installed version of flopy or add local path
@@ -75,8 +75,11 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     hk_size = raw_hk.shape
     # determine dummy slice perm based on maximum hydraulic conductivity
     dummy_slice_hk = 10*raw_hk.max()
-    # define dummy slice
-    dummy_array = dummy_slice_hk * np.ones((hk_size[0], hk_size[1], 1), dtype=np.float)
+    # define area with hk values above zero
+    core_mask = raw_hk[:,:,0]
+    core_mask[np.nonzero(core_mask)] = 1
+    # define hk in cells with nonzero hk to be equal to 10x the max hk
+    dummy_array = core_mask[:,:, np.newaxis]*dummy_slice_hk
     # concantenate dummy slice on hydraulic conductivity array
     hk = np.concatenate((dummy_array, raw_hk, dummy_array), axis=2)
     # Model information (true in all models called by 'p01')
@@ -94,7 +97,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     
     # ADDITIONAL MATERIAL PROPERTIES
     prsity = 0.25 # porosity. float or array of floats (nlay, nrow, ncol)
-    al = 0.1 # longitudental dispersivity
+    al = 0.02 # longitudental dispersivity
     trpt = 0.3 # ratio of horizontal transverse dispersivity to longitudenal dispersivity
     trpv = 0.3 # ratio of vertical transverse dispersivity to longitudenal dispersivity
     
@@ -104,13 +107,16 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # backpressure, give this in kPa for conversion
     bp_kpa = 70
     # Injection rate in defined units 
-    injection_rate = 0.5 # [cm^3/min]
+    injection_rate = 2 # [cm^3/min]
     # Core radius
     core_radius = 2.54 # [cm]
     # Calculation of core area
-    core_area = math.pi*core_radius**2
-    # specific discharge or injection rate/area
-    q = injection_rate/core_area # [cm/min]
+    core_area = 3.1415*core_radius**2
+    # Calculation of mask area
+    mask_area = np.sum(core_mask)*grid_size[0]*grid_size[1]
+    # total specific discharge or injection flux (rate/area)
+    # q = injection_rate/np.sum(core_mask) # [cm/min]
+    q = injection_rate*(mask_area/core_area)/np.sum(core_mask)
     
     # number of stress periods (MF input), calculated from period length input
     nper = len(perlen_mf)    
@@ -122,12 +128,14 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # perlen_mf = [1., 50]
     
     # MODFLOW head boundary conditions, <0 = specified head, 0 = no flow, >0 variable head
-    ibound = np.ones((nlay, nrow, ncol), dtype=np.int)
+    # ibound = np.ones((nlay, nrow, ncol), dtype=np.int)
+    ibound = np.repeat(core_mask[:, :, np.newaxis], ncol, axis=2)
+    
     # inlet conditions (currently set with well so inlet is zero)
     # ibound[:, :, 0] = -1
     # outlet conditions
     # ibound[5:15, 5:15, -1] = -1
-    ibound[:, :, -1] = -1
+    ibound[:, :, -1] = ibound[:, :, -1]*-1
     
     # MODFLOW constant initial head conditions
     strt = np.zeros((nlay, nrow, ncol), dtype=np.float)
@@ -139,20 +147,24 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
             hout = bp_kpa*1000/(1000*9.81)
     # assign outlet pressure as head converted from 'bp_kpa' input variable
     # strt[5:15, 5:15, -1] = hout
+    # strt[:, :, -1] = core_mask*hout
     strt[:, :, -1] = hout
     
     # Stress period well data for MODFLOW. Each well is defined through defintition
     # of layer (int), row (int), column (int), flux (float). The first number corresponds to the stress period
     # Example for 1 stress period: spd_mf = {0:[[0, 0, 1, q],[0, 5, 1, q]]}
-    well_info = np.zeros((nlay*nrow, 4), dtype=np.float)
+    well_info = np.zeros((int(np.sum(core_mask)), 4), dtype=np.float)
     # Nested loop to define every inlet face grid cell as a well
+    index_n = 0
     for layer in range(0, nlay):
         for row in range(0, nrow):
-    # for layer in range(5, 15):
-    #     for row in range(5, 15):
-            index_n = layer*nrow + row
+            # index_n = layer*nrow + row
+            # index_n +=1
             # print(index_n)
-            well_info[index_n] = [layer, row, 0, q]   
+            if core_mask[layer, row] > 0:
+                well_info[index_n] = [layer, row, 0, q]   
+                index_n +=1
+                
     # Now insert well information into stress period data 
     # *** TO DO: Generalize this for multiple stress periods
     # This has the form: spd_mf = {0:[[0, 0, 0, q],[0, 5, 1, q]], 1:[[0, 1, 1, q]]}
@@ -162,12 +174,17 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # This is used as input for the source and sink mixing package
     # Itype is an integer indicating the type of point source, 2=well, 3=drain, -1=constant concentration
     itype = 2
-    cwell_info = np.zeros((nlay*nrow, 5), dtype=np.float)
+    cwell_info = np.zeros((int(np.sum(core_mask)), 5), dtype=np.float)
+    # cwell_info = np.zeros((nrow*nlay, 5), dtype=np.float)
     # Nested loop to define every inlet face grid cell as a well
+    index_n = 0
     for layer in range(0, nlay):
         for row in range(0, nrow):
-            index_n = layer*nrow + row
-            cwell_info[index_n] = [layer, row, 0, c0, itype]
+            # index_n = layer*nrow + row
+            if core_mask[layer, row] > 0:
+                cwell_info[index_n] = [layer, row, 0, c0, itype] 
+                index_n +=1
+            # cwell_info[index_n] = [layer, row, 0, c0, itype]
             
     # Second stress period        
     cwell_info2 = cwell_info.copy()   
@@ -205,15 +222,15 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     #     the specified observation points should be saved. (default is 1).
     
     # Particle output control
-    dceps = 1.e-5
-    nplane = 1
-    npl = 0 # number of initial particles per cell to be placed in cells with a concentration less than 'dceps'
-    nph = 16
-    npmin = 2
-    npmax = 32 # maximum number of particles allowed per cell
-    dchmoc = 1.e-3
-    nlsink = nplane
-    npsink = nph
+    # dceps = 1.e-5
+    # nplane = 1
+    # npl = 0 # number of initial particles per cell to be placed in cells with a concentration less than 'dceps'
+    # nph = 16
+    # npmin = 2
+    # npmax = 32 # maximum number of particles allowed per cell
+    # dchmoc = 1.e-3
+    # nlsink = nplane
+    # npsink = nph
     
 # =============================================================================
 # START CALLING MODFLOW PACKAGES AND RUN MODEL
@@ -266,9 +283,10 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # mixelm = 2 is the backward tracking
     # mixelm = 3 is the hybrid method
     # mixelm = -1 is the third-ord TVD scheme (ULTIMATE)
-    adv = flopy.mt3d.Mt3dAdv(mt, mixelm=mixelm, dceps=dceps, nplane=nplane, 
-                             npl=npl, nph=nph, npmin=npmin, npmax=npmax,
-                             nlsink=nlsink, npsink=npsink, percel=0.5)
+    adv = flopy.mt3d.Mt3dAdv(mt, mixelm=mixelm)
+    # adv = flopy.mt3d.Mt3dAdv(mt, mixelm=mixelm, dceps=dceps, nplane=nplane, 
+    #                          npl=npl, nph=nph, npmin=npmin, npmax=npmax,
+    #                          nlsink=nlsink, npsink=npsink, percel=0.5)
 
     
     dsp = flopy.mt3d.Mt3dDsp(mt, al=al, trpt=trpt)

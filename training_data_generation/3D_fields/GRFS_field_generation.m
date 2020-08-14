@@ -104,3 +104,8 @@ title('Scaled Field')
 shading flat
 axis image
 colorbar
+
+filename = ['core_template.csv'];
+csvwrite(filename, a(:))
+%     Yfs_m2 = permute(Yfs_m2,[3 2 1]);
+    csvwrite(filename, a(:))
