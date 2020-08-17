@@ -13,9 +13,6 @@ Created on Fri May 22 16:50:00 2020
 import sys
 import os
 import numpy as np
-# import matplotlib as mpl
-# import matplotlib.pyplot as plt
-# import math
 import time
 
 # run installed version of flopy or add local path
@@ -25,21 +22,6 @@ except:
     fpth = os.path.abspath(os.path.join('..', '..'))
     sys.path.append(fpth)
     import flopy
-    
-# from flopy.utils.util_array import read1d
-
-# # set figure size, call mpl.rcParams to see all variables that can be changed
-# mpl.rcParams['figure.figsize'] = (8, 8)
-
-# names of executable with path IF NOT IN CURRENT DIRECTORY
-# exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
-# exe_name_mf = 'mf2005'
-# exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
-
-# # directory to save data
-# directory_name = 'data_3D_model'
-# datadir = os.path.join('..', directory_name, 'mt3d_test', 'mt3dms')
-# workdir = os.path.join('.', directory_name)
 
 # # uncomment if you want the information about numpy, matplotlib, and flopy printed    
 # # print(sys.version)
@@ -76,7 +58,8 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # determine dummy slice perm based on maximum hydraulic conductivity
     dummy_slice_hk = 10*raw_hk.max()
     # define area with hk values above zero
-    core_mask = raw_hk[:,:,0]
+    core_mask = np.ones((hk_size[0], hk_size[1]))
+    core_mask = np.multiply(core_mask, raw_hk[:,:,0])
     core_mask[np.nonzero(core_mask)] = 1
     # define hk in cells with nonzero hk to be equal to 10x the max hk
     dummy_array = core_mask[:,:, np.newaxis]*dummy_slice_hk
@@ -97,7 +80,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     
     # ADDITIONAL MATERIAL PROPERTIES
     prsity = 0.25 # porosity. float or array of floats (nlay, nrow, ncol)
-    al = 0.02 # longitudental dispersivity
+    al = 0.05 # longitudental dispersivity
     trpt = 0.3 # ratio of horizontal transverse dispersivity to longitudenal dispersivity
     trpv = 0.3 # ratio of vertical transverse dispersivity to longitudenal dispersivity
     
@@ -146,7 +129,6 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
         if lenuni == 2: 
             hout = bp_kpa*1000/(1000*9.81)
     # assign outlet pressure as head converted from 'bp_kpa' input variable
-    # strt[5:15, 5:15, -1] = hout
     # strt[:, :, -1] = core_mask*hout
     strt[:, :, -1] = hout
     
@@ -192,9 +174,13 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # Now apply stress period info    
     spd_mt = {0:cwell_info, 1:cwell_info2}
 
-    # Concentration boundary conditions set with well so this is commented out
-    # c0 = 1.
-    # icbund = np.ones((nlay, nrow, ncol), dtype=np.int)
+    # Concentration boundary conditions, this is neccessary to indicate 
+    # inactive concentration cells outside of the more
+    # If icbund = 0, the cell is an inactive concentration cell; 
+    # If icbund < 0, the cell is a constant-concentration cell; 
+    # If icbund > 0, the cell is an active concentration cell where the 
+    # concentration value will be calculated. (default is 1).
+    icbund = np.repeat(core_mask[:, :, np.newaxis], ncol, axis=2)
     # icbund[0, 0, 0] = -1
     # Initial concentration conditions, currently set to zero everywhere
     # sconc = np.zeros((nlay, nrow, ncol), dtype=np.float)
@@ -220,17 +206,6 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     #     a 1 is added to them before writing to the btn file.
     # nprobs (int): An integer indicating how frequently the concentration at 
     #     the specified observation points should be saved. (default is 1).
-    
-    # Particle output control
-    # dceps = 1.e-5
-    # nplane = 1
-    # npl = 0 # number of initial particles per cell to be placed in cells with a concentration less than 'dceps'
-    # nph = 16
-    # npmin = 2
-    # npmax = 32 # maximum number of particles allowed per cell
-    # dchmoc = 1.e-3
-    # nlsink = nplane
-    # npsink = nph
     
 # =============================================================================
 # START CALLING MODFLOW PACKAGES AND RUN MODEL
@@ -273,7 +248,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
                            exe_name=exe_name_mt, modflowmodel=mf)
     
     # Basic transport package class
-    btn = flopy.mt3d.Mt3dBtn(mt, ncomp=1, icbund=1, prsity=prsity, sconc=0, 
+    btn = flopy.mt3d.Mt3dBtn(mt, ncomp=1, icbund=icbund, prsity=prsity, sconc=0, 
                              tunit=mt_tunit, lunit=mt_lunit, nprs=nprs, timprs=timprs)
     
     # mixelm is an integer flag for the advection solution option, 
@@ -284,11 +259,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # mixelm = 3 is the hybrid method
     # mixelm = -1 is the third-ord TVD scheme (ULTIMATE)
     adv = flopy.mt3d.Mt3dAdv(mt, mixelm=mixelm)
-    # adv = flopy.mt3d.Mt3dAdv(mt, mixelm=mixelm, dceps=dceps, nplane=nplane, 
-    #                          npl=npl, nph=nph, npmin=npmin, npmax=npmax,
-    #                          nlsink=nlsink, npsink=npsink, percel=0.5)
 
-    
     dsp = flopy.mt3d.Mt3dDsp(mt, al=al, trpt=trpt)
     # Reactions package (optional)
     # rct = flopy.mt3d.Mt3dRct(mt, isothm=1, ireact=1, igetsc=0, rhob=rhob, sp1=kd, 
@@ -315,6 +286,9 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     hdobj = flopy.utils.HeadFile(fname)
     heads = hdobj.get_data()
     
+    # set inactive cell pressures to zero, by default inactive cells have a pressure of -999
+    heads[heads < -990] = 0
+    
     # convert heads to pascals
     if lenuni == 3: # centimeters
         pressures = heads/100*(1000*9.81) 
@@ -326,6 +300,11 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     # crop off extra concentration slices
     conc = conc[:,:,:,1:-1]
     
+    # calculate pressure drop
+    center = round(nrow/2)
+    dp = np.mean(pressures[center-3:center+2, center-3:center+2, 0]) - np.mean(pressures[center-3:center+2, center-3:center+2, -1])
+    # print('Pressure drop: '+ str(dp/1000) + ' kPa')
+    
     # crop off extra pressure slices
     pressures = pressures[:,:,1:-1]
 
@@ -333,24 +312,18 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     end = time.time() # end timer
     print('Model run time: ', end - start) # show run time
 
-    return mf, mt, conc, timearray, pressures
+    return mf, mt, conc, timearray, pressures, dp
 
 
 # Function to calculate the mean breakthrough time
-def mean_bt_map(conc, grid_size, perlen_mf, timearray):
+def mean_bt_map(conc, raw_hk, grid_size, perlen_mf, timearray):
     # also output the mean breakthrough time map
     conc_size = conc.shape
-    # Append the stress period end time as this is also recorded in addition to 
-    # time specified in 'timprs'
-    # sp_end_times = np.cumsum(perlen_mf)
-    # # append times to end of timprs array
-    # t_appended = np.append(timprs, sp_end_times) 
-    # # sort chronologically
-    # t_sorted = np.sort(t_appended)
-    # # remove repeats
-    # timearray = np.unique(t_sorted)  
-    # print(timearray)
-    # print(timearray)
+
+    # define area with hk values above zero
+    core_mask = np.ones((conc_size[1], conc_size[2]))
+    core_mask = np.multiply(core_mask, raw_hk[:,:,0])
+    core_mask[np.nonzero(core_mask)] = 1
     
     # Preallocate breakthrough time array
     bt_array = np.zeros((conc_size[1], conc_size[2], conc_size[3]), dtype=np.float)
@@ -358,29 +331,31 @@ def mean_bt_map(conc, grid_size, perlen_mf, timearray):
     for layer in range(0, conc_size[1]):
         for row in range(0, conc_size[2]):
             for col in range(0, conc_size[3]):
-                cell_btc = conc[:, layer, row, col]
-            
-                # check to make sure tracer is in grid cell
-                if cell_btc.sum() > 0:
-                    # calculate zero moment
-                    m0 = np.trapz(cell_btc, timearray)
-                    # calculate first moment of grid cell 
-                    m1 = np.trapz(cell_btc*timearray, timearray);
-                    
-                    # calculate center of mass in time (mean breakthrough time)
-                    bt_array[layer, row, col] = m1/m0
+                # Check if outside core
+                if core_mask[layer, row] > 0:
+                    cell_btc = conc[:, layer, row, col]
+                    # check to make sure tracer is in grid cell
+                    if cell_btc.sum() > 0:
+                        # calculate zero moment
+                        m0 = np.trapz(cell_btc, timearray)
+                        # calculate first moment of grid cell 
+                        m1 = np.trapz(cell_btc*timearray, timearray)
+                        # calculate center of mass in time (mean breakthrough time)
+                        bt_array[layer, row, col] = m1/m0
 
     # shift breakthrough time so that mean of first slice is half-way through the pulse injection
-    mean_bt_inlet = np.mean(bt_array[:,:,0])
+    mean_bt_inlet = np.sum(bt_array[:,:,0])/np.sum(core_mask)
     half_inj_time = (perlen_mf[0]/2)
     bt_array -= mean_bt_inlet 
-    # bt_array += half_inj_time
+    
+    for col in range(0, conc_size[3]):
+        bt_array[:,:,col] = np.multiply(bt_array[:,:,col], core_mask)
 
     # Arrival time difference map calculation
 # % new mean breakthrough time at the inlet
-    mean_bt_inlet = np.mean(bt_array[:,:,0])
+    mean_bt_inlet = np.sum(bt_array[:,:,0])/np.sum(core_mask)
     # calculate mean arrival time at the outlet
-    mean_bt_outlet = np.mean(bt_array[:,:,-1])
+    mean_bt_outlet = np.sum(bt_array[:,:,-1])/np.sum(core_mask)
     # Calculate velocity from difference in mean arrival time between inlet and outlet
     model_length = grid_size[2]*(conc_size[3]-1)
     v = model_length/(mean_bt_outlet - mean_bt_inlet)
@@ -388,16 +363,14 @@ def mean_bt_map(conc, grid_size, perlen_mf, timearray):
     xg = np.arange(0, (model_length+grid_size[2]), grid_size[2]) #+ (grid_size[2]/2)
     # vector of ideal mean arrival time based average v
     bt_ideal = xg/v
-# % shifted
-# mean_xt = mean_xt -(mean_xt(1) - (inj_t/2));
+
     # Turn this vector into a matrix so that it can simple be subtracted from
     bt_ideal_array = np.tile(bt_ideal, (conc_size[1], conc_size[2], 1))
 
-# % the arrive time map calculated from the PET data
-# mean_xt3d(1,1,1:PET_size(3)) = mean_xt;
-# Xth = repmat(mean_xt3d, PET_size(1),PET_size(1),1);
     # % Arrival time difference map
     bt_diff = (bt_ideal_array - bt_array)
+    for col in range(0, conc_size[3]):
+        bt_diff[:,:,col] = np.multiply(bt_diff[:,:,col], core_mask)
     # normalized
     bt_diff_norm = bt_diff*(v/model_length)
 

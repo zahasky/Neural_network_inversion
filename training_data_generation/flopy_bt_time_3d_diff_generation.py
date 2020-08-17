@@ -70,22 +70,16 @@ grid_size = [0.23291, 0.23291, 0.2388] # selected units [cm]
 # the times as specified in timprs (evenly allocated between 0 and sim run length); 
 # if nprs = 0, results will not be saved except at the end of simulation; if NPRS < 0, simulation results will be 
 # saved whenever the number of transport steps is an even multiple of nprs. (default is 0).
-nprs = 120
-# viscosity of water in pascal
-# mu = 8.9e-4 # [pa.s]
-# # Injection flux per cell
-# q = 0.024669065517374814 # [cm/min]
-# u = q/60/100 #[m/sec]
-    
+nprs = 150 
 # period length in selected units (for steady state flow it can be set to anything)
-perlen_mf = [2., 80]
+perlen_mf = [1., 90]
 # Numerical method flag
 mixelm = -1
 
 # Call function and time it
 start_td = time.time() # start a timer
 
-for td in range(1, 2):
+for td in range(3, 4):
     
     print('TRAINING DATASET: ' + str(td))
        
@@ -98,12 +92,18 @@ for td in range(1, 2):
     tdata_km2 = tdata_km2[0:-3]
     # raw_km2 = tdata_km2.reshape(nlay, nrow, ncol, order='F') # this is the command needed if data isn't permuted before converting from matrix to vector in matlab
     raw_km2 = tdata_km2.reshape(nlay, nrow, ncol)
-    # Convert permeabiltiy (in m^2) to hydraulic conductivity in cm/min
-    raw_hk = raw_km2*(1000*9.81*100*60/8.9E-4)
+    
     # if defined, set permeability values outside of core to zero with core mask
     if 'core_mask' in locals():
         for col in range(ncol):
-            raw_hk[:,:,col] = np.multiply(raw_hk[:,:,col], core_mask)
+            raw_km2[:,:,col] = np.multiply(raw_km2[:,:,col], core_mask)
+            # save cropped hk data
+            save_cropped_perm_filename = perm_field_dir + '\\core_td_3dk_m2_' + str(td) +'.csv'
+            save_data = np.append(raw_km2.flatten('C'), [nlay, nrow, ncol])
+            np.savetxt(save_cropped_perm_filename, save_data, delimiter=',')
+        
+    # Convert permeabiltiy (in m^2) to hydraulic conductivity in cm/min
+    raw_hk = raw_km2*(1000*9.81*100*60/8.9E-4)
     
     # Describe grid for results    
     Lx = (ncol) * grid_size[2]   # length of model in selected units 
@@ -113,45 +113,37 @@ for td in range(1, 2):
     model_dirname = ('td'+ str(td))
     model_ws = os.path.join(workdir, model_dirname)
     
-    mf, mt, conc, timearray, pressures = mt3d_pulse_injection_sim(model_dirname, model_ws, raw_hk, grid_size, perlen_mf, nprs, mixelm, exe_name_mf, exe_name_mt)
-    # calculate pressure drop
-    dp = np.mean(pressures[:,:,0]) - np.mean(pressures[:,:,-1])
-    print('Pressure drop: '+ str(dp) + ' pascals')
+    mf, mt, conc, timearray, pressures, dp = mt3d_pulse_injection_sim(model_dirname, model_ws, raw_hk, grid_size, perlen_mf, nprs, mixelm, exe_name_mf, exe_name_mt)
+    # print pressure drop
+    print('Pressure drop: '+ str(dp/1000) + ' kPa')
     
     # process the simulation data
-    bt_array, bt_diff, bt_diff_norm = mean_bt_map(conc, grid_size, perlen_mf, timearray)
-    
-    # print('Mean bt_diff inlet: ' + str(np.mean(bt_diff_norm[:,:,0])))
-    # print('Mean bt_diff outlet: ' + str(np.mean(bt_diff_norm[:,:,-1])))
-    
- 
-    # print('Pressure-based mean perm: '+ str(mean_perm/9.869233E-13) + ' D')
-    # print('Field-based mean perm: '+ str(np.mean(tdata_km2)/9.869233E-13) + ' D')
+    bt_array, bt_diff, bt_diff_norm = mean_bt_map(conc, raw_hk, grid_size, perlen_mf, timearray)
     
     # =============================================================================
     # SAVE DATA 
     # =============================================================================
     # save normalized breakthrough data
-    save_filename_sp = workdir + '\\' + 'norm_' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'test.csv'
+    save_filename_btdn = workdir + '\\' + 'norm_' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'test.csv'
     save_data = np.append(bt_diff_norm.flatten('C'), [dp, Lx])
-    np.savetxt(save_filename_sp, save_data, delimiter=',')
+    np.savetxt(save_filename_btdn, save_data, delimiter=',')
     
     # save unnormalized breakthrough data
-    save_filename_sp2 = workdir + '\\' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'test.csv'
+    save_filename_btd = workdir + '\\' + model_dirname + '_bt' + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'test.csv'
     save_data = np.append(bt_array.flatten('C'), [dp, Lx])
-    np.savetxt(save_filename_sp2, save_data, delimiter=',')
+    np.savetxt(save_filename_btd, save_data, delimiter=',')
     
-    tdata_ex = np.loadtxt(save_filename_sp, delimiter=',')
-    load_lx = tdata_ex[-1]
-    load_dp = tdata_ex[-2]
-    tdata_ex = tdata_ex[0:-2]
-    tdata_ex = tdata_ex.reshape(nlay, nrow, ncol)
+    tdata_norm = np.loadtxt(save_filename_btdn, delimiter=',')
+    load_lx = tdata_norm[-1]
+    load_dp = tdata_norm[-2]
+    tdata_norm = tdata_norm[0:-2]
+    tdata_norm = tdata_norm.reshape(nlay, nrow, ncol)
     
-    tdata_ex2 = np.loadtxt(save_filename_sp2, delimiter=',')
-    load_lx = tdata_ex2[-1]
-    load_dp = tdata_ex2[-2]
-    tdata_ex2 = tdata_ex2[0:-2]
-    tdata_ex2 = tdata_ex2.reshape(nlay, nrow, ncol)
+    tdata_raw = np.loadtxt(save_filename_btd, delimiter=',')
+    load_lx = tdata_raw[-1]
+    load_dp = tdata_raw[-2]
+    tdata_raw = tdata_raw[0:-2]
+    tdata_raw = tdata_raw.reshape(nlay, nrow, ncol)
     
     # Try to delete the previous folder of MODFLOW and MT3D files
     if td > 1:
@@ -165,7 +157,7 @@ for td in range(1, 2):
 
 # Print final run time
 end_td = time.time() # end timer
-# print('Minutes to run 10,000 training simulations: ', (end_td - start_td)/60) # show run time
+print('Minutes to run 10,000 training simulations: ', (end_td - start_td)/60) # show run time
     
 # =============================================================================
 # PLOT DATA 
@@ -174,7 +166,7 @@ end_td = time.time() # end timer
 y, x = np.mgrid[slice(0, Ly + grid_size[1], grid_size[1]),
                  slice(0, Lx + grid_size[2], grid_size[2])]
 # layer to plot
-ilayer = 9
+ilayer = 6
 # # fontsize
 fs = 18
 
@@ -194,46 +186,45 @@ fig1 = plt.figure(figsize=(10, 15))
 ax0 = fig1.add_subplot(3, 1, 1, aspect='equal')
 imp = plt.pcolor(x, y, conc[5,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
-plt.clim(0,1) 
+plt.clim(0,0.4) 
 cbar.set_label('Solute concentration', fontsize=fs)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
 plt.title('Time: %1.1f min' %timearray[5], fontsize=fs+2)
 
 ax1 = fig1.add_subplot(3, 1, 2, aspect='equal')
-imp = plt.pcolor(x, y, conc[30,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, conc[20,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
-plt.clim(0,1) 
+plt.clim(0,0.4) 
 cbar.set_label('Solute concentration', fontsize=fs)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax1.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f min' %timearray[30], fontsize=fs+2)
+plt.title('Time: %1.1f min' %timearray[20], fontsize=fs+2)
 
 ax2 = fig1.add_subplot(3, 1, 3, aspect='equal')
-imp = plt.pcolor(x, y, conc[45,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, conc[100,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
-plt.clim(0,1) 
+plt.clim(0,0.04) 
 cbar.set_label('Solute concentration', fontsize=fs)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax2.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f min' %timearray[45], fontsize=fs+2)
-
-
+plt.title('Time: %1.1f min' %timearray[100], fontsize=fs+2)
+plt.ylabel('Distance [cm]', fontsize=fs)
 
 # Second figure with head and breakthrough time difference maps
 fig2 = plt.figure(figsize=(10, 15))
 ax0 = fig2.add_subplot(3, 1, 1, aspect='equal')
-dp_pressures = pressures - np.mean(pressures[:,:,-1])
-imp = plt.pcolor(x, y, dp_pressures[ilayer,:,:], cmap='Blues', edgecolors='k', linewidths=0.2)
+dp_pressures = (pressures[ilayer,:,:]/1000)-70
+imp = plt.pcolor(x, y, dp_pressures, cmap='Blues', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
-# plt.clim(0,1) 
-cbar.set_label('Pascals', fontsize=fs)
+plt.clim(0, np.max(dp_pressures)) 
+cbar.set_label('kPa', fontsize=fs)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
 plt.title('Pressure Drop', fontsize=fs+2)
 
 ax1 = fig2.add_subplot(3, 1, 2, aspect='equal')
-imp = plt.pcolor(x, y, tdata_ex2[ilayer,:,:], cmap='YlGn', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, tdata_raw[ilayer,:,:], cmap='YlGn', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 # plt.clim(0,1) 
 cbar.set_label('Time [min]', fontsize=fs)
@@ -242,7 +233,7 @@ ax1.tick_params(axis='both', which='major', labelsize=fs)
 plt.title('Mean Breakthrough Time [min]', fontsize=fs+2)
 
 ax2 = fig2.add_subplot(3, 1, 3, aspect='equal')
-imp = plt.pcolor(x, y, tdata_ex[ilayer,:,:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, tdata_norm[ilayer,:,:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 cbar.set_label('Pore Volumes', fontsize=fs)
 cbar.ax.tick_params(labelsize= (fs-2)) 
