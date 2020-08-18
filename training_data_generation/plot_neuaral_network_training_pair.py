@@ -13,7 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 # training data iteration
-td = 10
+td = 5
 
 
 # layer to plot
@@ -32,10 +32,10 @@ grid_size = [0.25, 0.25, 0.25] # selected units [cm]
 # LOAD SELECTED EXAMPLE DATA 
 # =============================================================================
 # Set path to perm maps
-perm_field_dir = os.path.join('.', 'matlab_perm_fields\\k_training_data')
+perm_field_dir = os.path.join('.', '2D_fields\\matlab_perm_fields\\k_training_data')
 
 # Set path to training data output
-workdir = os.path.join('.', 'Tdata_2D\\td_1000')
+workdir = os.path.join('.', '2D_fields\\Tdata_2D')
 # Import permeability map
 tdata_km2 = np.loadtxt(perm_field_dir + '\\td_km2_' + str(td) +'.csv', delimiter=',')
 
@@ -63,8 +63,8 @@ p_input [:,:,0] = load_dp/1000
 # =============================================================================
 # Define grid    
 # Describe grid for results    
-Lx = (ncol - 1) * grid_size[1]   # length of model in selected units 
-Ly = (nrow - 1) * grid_size[0]   # length of model in selected units 
+Lx = (ncol) * grid_size[1]   # length of model in selected units 
+Ly = (nrow) * grid_size[0]   # length of model in selected units 
 y, x = np.mgrid[slice(0, Ly + grid_size[0], grid_size[0]),
                 slice(0, Lx + grid_size[1], grid_size[1])]
 

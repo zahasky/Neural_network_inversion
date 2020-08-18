@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+"""
+batching_unbatching_td.py
+Created on Tue Aug  18 08:23:38 2020
+
+@author: Christopher Zahasky
+
+This script is used to move around files
+"""
+
+import os
+import shutil
+import numpy as np
+
+# Set path to main folder with all of files
+workdir = os.path.join('D:\\Training_data_generation_2D\\gauss_fields\\no_rotation')
+
+
+path2files = 'D:\\Training_data_generation_2D\\gauss_fields\\no_rotation'
+path2batch_folders = 'D:\\Training_data_generation_2D\\gauss_fields\\batch_test'
+# number of files per folder
+batch_size = 2
+# number of training data used
+total_td_size = 10
+
+shutil.copy('C:\\spam.txt', 'C:\\delicious') # (source, destination) 
+
+#define the function
+def batchfiles(batch_size, total_td_size, path2files, path2batch_folders):
+   
+    batch_folder_inc = np.arange(batch_size, total_td_size+1, batch_size) # build the threshold range
+
+    for k in len(batch_folder_inc[1:]):
+        batch_foldername = 'td_' + str(batch_folder_inc[k]) +
+        dest_f = os.path.join(basepath, dest_folder)
+        if not os.path.isdir(dest_f):
+            os.mkdir(dest_f)
+        temp.to_csv(os.path.join(dest_f, "{}_{}.csv".format(name, k)))
+
+# use os.walk(path) on the main path to get ALL subfolders inside path
+for root,dirs, files in os.walk(path):
+    for f in files:
+        if f.endswith(".csv"):
+            filename = os.path.join(root, f)
+            df = pd.read_csv(filename)
+            name = os.path.split(os.path.basename(filename))[1]
+            dest_folder = os.path.basename(os.path.dirname(filename))
+            data_splitter(df, name, dest_folder)
+            
+            
+# shutil.rmtree(path)

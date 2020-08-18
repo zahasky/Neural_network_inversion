@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-flopy_bt_time_3d_diff_generation.py
 Created on Fri Jun  5 08:23:38 2020
 
-@author: Christopher Zahasky
-
-This script is used to generate 3D breakthrough time maps using synthetically 
-generated 3D permeability fields. This script calls functions from the python
-script titled 'flopy_bt_3d_functions.py'
+@author: zahas
 """
 
 # Only packages called in this script need to be imported
