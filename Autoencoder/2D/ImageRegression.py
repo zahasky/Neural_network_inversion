@@ -68,8 +68,8 @@ class TrainDataset(Dataset):
 # --------------------------------
 ##initialize dataset object
 dataset = TrainDataset()
-dataset_input = dataset[0:10000]
-dataloader_input = DataLoader(dataset=dataset_input, batch_size=50, shuffle=True, num_workers=2)
+dataset_input = dataset[:]
+dataloader_input = DataLoader(dataset=dataset_input, batch_size=500, shuffle=True, num_workers=2)
 
 
 # --------------------------------------------------------
