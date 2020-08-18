@@ -80,10 +80,10 @@ Tensor = torch.FloatTensor
 encoder = Encoder(outchannels=nf)
 decoder = Decoder(inchannels=nf)
 
-encoder.load_state_dict(torch.load('./encoder_epoch50.pth', map_location='cpu'))
+encoder.load_state_dict(torch.load('./encoder_epoch100.pth', map_location='cpu'))
 encoder.eval()
 
-decoder.load_state_dict(torch.load('./decoder_epoch50.pth', map_location='cpu'))
+decoder.load_state_dict(torch.load('./decoder_epoch100.pth', map_location='cpu'))
 decoder.eval()
 
 for i, (imgs_inp) in enumerate(dataloader_input):
