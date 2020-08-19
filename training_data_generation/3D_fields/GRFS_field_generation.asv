@@ -28,7 +28,7 @@ F.nx  = 20;               % numerical grid resolution in x
 F.ny  = 20;               % numerical grid resolution in y
 F.nz  = 40;               % numerical grid resolution in z
 
-for i = 1:length(Rm)
+for i = 1:3 %length(Rm)
     
     % Correlation length
     F.If  = [Rm(i,1), Rm(i,2), Rm(i,3)]; % correlation lengths in [x,y,z]
@@ -52,13 +52,12 @@ for i = 1:length(Rm)
     % scaled permeability field
     Yfs = (Hf*mean_k.*Yf_norm) + mean_k;
     
-    % Check for negative permeability values and replace with minimum
-    % positive value
+    % Check for negative permeability values
     if min(Yfs(:)) < 0
         min_positive = min(Yfs(Yfs>0));
-        Yfs(Yfs<0) = min_positive;
-    end
+        Yfs(Yfs<0)
         
+    
     % Save for Python loading
     % Convert from mD to D
     Yfs_D = Yfs./1000;
@@ -71,12 +70,12 @@ for i = 1:length(Rm)
     filename = ['trd_3dk_m2_', num2str(i), '.csv'];
     csvwrite(filename, [Yfs_m2(:); F.nx; F.ny; F.nz])
     
-%     figure
-%     imagesc(squeeze(Yfs(10,:,:)))
-%     axis image
-%     colormap('gray')
-%     colorbar
-%     set(gca,'Ydir','normal')
+    figure
+    imagesc(squeeze(Yfs(10,:,:)))
+    axis image
+    colormap('gray')
+    colorbar
+    set(gca,'Ydir','normal')
 end
 
 
