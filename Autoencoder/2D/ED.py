@@ -62,8 +62,8 @@ class Encoder(nn.Module):
         self.trans1 = nn.Sequential(
             nn.BatchNorm2d(filters),
             nn.ReLU(inplace=True),
-            nn.Conv2d(filters, filters, kernel_size=3, stride=1, padding=1),
             nn.MaxPool2d(4, 2, 1),
+            nn.Conv2d(filters, filters, kernel_size=3, stride=1, padding=1),
         )
         self.conv2 = nn.Conv2d(filters, outchannels, 3, 1, 1, bias=False)
 
