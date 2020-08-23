@@ -69,7 +69,7 @@ class TrainDataset(Dataset):
 ##initialize dataset object
 dataset = TrainDataset()
 dataset_input = dataset[:]
-dataloader_input = DataLoader(dataset=dataset_input, batch_size=500, shuffle=True, num_workers=2)
+dataloader_input = DataLoader(dataset=dataset_input, batch_size=100, shuffle=True, num_workers=2)
 
 
 # --------------------------------------------------------
@@ -80,7 +80,7 @@ cuda = True if torch.cuda.is_available() else False
 # latent dimension = nf*h*w
 nf, h, w = 1, 10, 20
 Tensor = torch.FloatTensor
-nepochs = 50
+nepochs = 100
 
 # list storing generator's loss and pixel-wise loss
 g_l = []
