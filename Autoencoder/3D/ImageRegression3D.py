@@ -4,14 +4,14 @@ import torch.nn as nn
 import numpy as np
 import math
 import os
-import CAAE3D
+import ED3D
 import itertools
 
 from torch.autograd import Variable
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, MultiStepLR
 from torch.utils.data import Dataset, DataLoader
-from CAAE3D import Encoder, Decoder
+from ED3D import Encoder, Decoder
 from numpy import savetxt
 
 
