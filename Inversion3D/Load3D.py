@@ -6,9 +6,9 @@ import math
 import os
 import itertools
 import matplotlib.pyplot as plt
-import CAAE3D
+import ED
 
-from CAAE3D import Encoder, Decoder
+from ED import Encoder, Decoder
 from torch.autograd import Variable
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, MultiStepLR
