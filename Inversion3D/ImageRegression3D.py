@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 import math
 import os
-import CAAE3D2
+import ED
 import itertools
 import random
 
@@ -12,7 +12,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, MultiStepLR
 from torch.utils.data import Dataset, DataLoader
-from CAAE3D2 import Encoder, Decoder
+from ED import Encoder, Decoder
 from numpy import savetxt
 
 
