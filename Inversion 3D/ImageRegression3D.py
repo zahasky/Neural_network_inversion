@@ -33,7 +33,7 @@ class InputDataset(Dataset):
         nrow = 20 # number of rows / grid cells
         ncol = 40 # number of columns (parallel to axis of core)
 
-        index_1 = [x for x in range(30000,30500,500)]
+        index_1 = [x for x in range(10500,30000,500)]
         invalid = False
 
         numb = index_1.__getitem__(-1)
@@ -41,7 +41,7 @@ class InputDataset(Dataset):
 
         q = 0   # index of the elements in the input list
         for i in index_1:
-            index_2 = [y for y in range(2)] #indeces for every .csv file
+            index_2 = [y for y in range(500)] #indeces for every .csv file
 
             for j in index_2:
                 model_lab_filename_sp = perm_field_dir + str(i) + '/core_k_3d_m2_' + str(i-j) + '.csv'
