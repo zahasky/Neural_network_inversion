@@ -143,7 +143,7 @@ torch.set_default_dtype(torch.float32)
 
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
-nepochs = 1
+nepochs = 199
 
 # lists storing training loss
 g_l = []
