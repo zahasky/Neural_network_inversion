@@ -44,10 +44,10 @@ exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
 exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # directory to save data
-directory_name = 'Testdata_3D_cores_4k'
+directory_name = 'Tdata_3D_cores_20k'
 # datadir = os.path.join('..', directory_name, 'mt3d_test', 'mt3dms')
 # workdir = os.path.join('.', '3D_fields', directory_name)
-workdir = os.path.join('D:\\Training_data_generation_3D\\', directory_name)
+workdir = os.path.join('A:\\Huang\\3D_dataset_2\\', directory_name)
 
 # uncomment if you want the information about numpy, matplotlib, and flopy printed    
 # print(sys.version)
@@ -57,7 +57,7 @@ workdir = os.path.join('D:\\Training_data_generation_3D\\', directory_name)
 
 # Set path to perm maps
 # perm_field_dir = os.path.join('.', '3D_perm')
-perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\Testdata_3D_perm_4k')
+perm_field_dir = os.path.join('A:\\Huang\\3D_dataset_2\\Tdata_3D_perm_20k')
 
 # Import core shape mask
 core_mask = np.loadtxt('core_template.csv', delimiter=',')
@@ -84,12 +84,12 @@ mixelm = -1
 # Call function and time it
 start_td = time.time() # start a timer
 
-for td in range(3, 4001):
+for td in range(2, 20001):
     
     print('TRAINING DATASET: ' + str(td))
        
     # Import permeability map
-    tdata_km2 = np.loadtxt(perm_field_dir + '\\trd_3dk_m2_' + str(td) +'.csv', delimiter=',')
+    tdata_km2 = np.loadtxt(perm_field_dir + '\\k_3d_m2_' + str(td) +'.csv', delimiter=',')
     
     nlay = int(tdata_km2[-3]) # number of layers / grid cells
     nrow = int(tdata_km2[-2]) # number of columns 
@@ -103,7 +103,7 @@ for td in range(3, 4001):
         for col in range(ncol):
             raw_km2[:,:,col] = np.multiply(raw_km2[:,:,col], core_mask)
             # save cropped hk data
-            save_cropped_perm_filename = perm_field_dir + '\\core_td_3dk_m2_' + str(td) +'.csv'
+            save_cropped_perm_filename = perm_field_dir + '\\core_k_3d_m2_' + str(td) +'.csv'
             save_data = np.append(raw_km2.flatten('C'), [nlay, nrow, ncol])
             np.savetxt(save_cropped_perm_filename, save_data, delimiter=',')
         
@@ -150,7 +150,7 @@ for td in range(3, 4001):
 
 # Print final run time
 end_td = time.time() # end timer
-print('Minutes to run 4,000 training simulations: ', (end_td - start_td)/60) # show run time
+print('Minutes to run 20,000 training simulations: ', (end_td - start_td)/60) # show run time
     
 # =============================================================================
 # PLOT DATA 
@@ -159,7 +159,7 @@ print('Minutes to run 4,000 training simulations: ', (end_td - start_td)/60) # s
 y, x = np.mgrid[slice(0, Ly + grid_size[1], grid_size[1]),
                   slice(0, Lx + grid_size[2], grid_size[2])]
 # layer to plot
-ilayer = 9
+ilayer = 8
 # # fontsize
 fs = 18
 

@@ -2,7 +2,7 @@
 % Christopher Zahasky
 % 14/24/2018
 clear all
-% close all
+close all
 set(0,'DefaultAxesFontSize',17, 'defaultlinelinewidth', 2,...
     'DefaultAxesTitleFontWeight', 'normal')
 

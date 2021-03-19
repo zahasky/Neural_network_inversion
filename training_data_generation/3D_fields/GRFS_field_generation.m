@@ -9,7 +9,7 @@
 clear all
 close all
 
-fid = fopen('perm_field3D_parameter_space_test_set.dat');
+fid = fopen('perm_field3D_parameter_space_20k.dat');
 Rr = textscan(fid,'%f %f %f %f %f');
 fclose(fid);
 
@@ -68,7 +68,7 @@ for i = 1:length(Rm)
     Yfs_m2 = permute(Yfs_m2,[3 2 1]);
     
     % Save to csv
-    filename = ['trd_3dk_m2_', num2str(i), '.csv'];
+    filename = ['k_3d_m2_', num2str(i), '.csv'];
     csvwrite(filename, [Yfs_m2(:); F.nx; F.ny; F.nz])
     
 %     figure

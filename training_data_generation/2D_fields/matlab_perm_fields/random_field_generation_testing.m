@@ -163,3 +163,18 @@ end
 % figure
 % edges = [0:0.5:10];
 % histogram(aspect_ratio,edges)
+
+figure
+imagesc(log(F_mat_D*1000));
+        % axis equal
+        % axis tight
+        % subplot(1,2,2)
+        % imagesc(squeeze(F_mat_m2))
+        % imagesc(x,y, F_mat_D);
+        axis equal
+        axis tight
+        colorbar;
+        colormap(gray)
+        xlabel('distance [cm]')
+        ylabel('distance [cm]')
+        title('synthetic permeability field [mD]')
