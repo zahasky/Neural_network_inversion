@@ -215,16 +215,16 @@ plt.clim(np.min(inp_img[round(dataset.nlay/2),:,:]), np.max(inp_img[round(datase
 # plt.title('Normalized Breakthrough Time Layer 10', fontsize=fs, fontweight='bold', **hfont)
 # plt.clim(np.min(inp_img[round(dataset.nlay/2),:,:]), np.max(inp_img[round(dataset.nlay/2),:,:]))
 
-# Fpr plotting label-prediction difference map
-# ax2 = fig1.add_subplot(2, 2, 2, aspect='equal')
+# #For plotting label-prediction difference map
+# ax2 = fig1.add_subplot(4, 2, 1, aspect='equal')
 # imp = plt.pcolor(x, y, diff_img[round(dataset.nlay/2),:,:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
 # cbar = plt.colorbar()
-# cbar.set_label('Permeability [$m^{2}$]', fontsize=fs, **hfont)
+# cbar.set_label('Log Permeability '+ '\n' +'[millidarcy]', fontsize=fs, **hfont)
 # cbar.ax.tick_params(labelsize= (fs))
-# ax2.set_xlabel('Distance from inlet [cm]', fontsize=fs, **hfont)
+# ax2.set_xlabel('Distance from inlet [cm]', fontsize=fs-3, **hfont)
 # ax2.tick_params(axis='both', which='major', labelsize=fs)
-# plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
-# plt.title('Log Permeability Difference Layer 10', fontsize=fs-2, **hfont)
+# plt.ylabel('Distance [cm]', fontsize=fs-3, **hfont)
+# plt.title('Log Permeability Difference Layer 10', fontsize=fs, fontweight='bold', **hfont)
 # plt.clim(np.min(np.percentile(lab_img[round(dataset.nlay/2),:,:].flatten(),[1,99])), np.max(np.percentile(lab_img[round(dataset.nlay/2),:,:].flatten(),[1,99])))
 
 ax2 = fig1.add_subplot(3, 2, 3, aspect='equal')
@@ -260,17 +260,18 @@ plt.ylabel('Distance [cm]', fontsize=fs-3, **hfont)
 plt.title('Normalized Breakthrough Time Row 10', fontsize=fs, fontweight='bold', **hfont)
 plt.clim(np.min(inp_img[:,round(dataset.nrow/2),:]), np.max(inp_img[:,round(dataset.nrow/2),:]))
 
-# Fpr plotting label-prediction difference map
-# ax2 = fig1.add_subplot(2, 2, 2, aspect='equal')
+# #For plotting label-prediction difference map
+# ax2 = fig1.add_subplot(4, 2, 2, aspect='equal')
 # imp = plt.pcolor(x, y, diff_img[:,round(dataset.nrow/2),:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
 # cbar = plt.colorbar()
-# cbar.set_label('Permeability [$m^{2}$]', fontsize=fs, **hfont)
+# cbar.set_label('Log Permeability '+ '\n' +'[millidarcy]', fontsize=fs, **hfont)
 # cbar.ax.tick_params(labelsize= (fs))
-# ax2.set_xlabel('Distance from inlet [cm]', fontsize=fs, **hfont)
+# ax2.set_xlabel('Distance from inlet [cm]', fontsize=fs-3, **hfont)
 # ax2.tick_params(axis='both', which='major', labelsize=fs)
-# plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
-# plt.title('Log Permeability Difference Row 10', fontsize=fs-2, **hfont)
+# plt.ylabel('Distance [cm]', fontsize=fs-3, **hfont)
+# plt.title('Log Permeability Difference Row 10', fontsize=fs, fontweight='bold', **hfont)
 # plt.clim(np.min(np.percentile(lab_img[:,round(dataset.nrow/2),:].flatten(),[1,99])), np.max(np.percentile(lab_img[:,round(dataset.nrow/2),:].flatten(),[1,99])))
+
 
 ax2 = fig1.add_subplot(3, 2, 4, aspect='equal')
 imp = plt.pcolor(x, y, lab_img[:,round(dataset.nrow/2),:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
