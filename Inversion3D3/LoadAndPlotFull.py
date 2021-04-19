@@ -216,7 +216,7 @@ plt.clim(np.min(inp_img[round(dataset.nlay/2),:,:]), np.max(inp_img[round(datase
 # plt.clim(np.min(inp_img[round(dataset.nlay/2),:,:]), np.max(inp_img[round(dataset.nlay/2),:,:]))
 
 # #For plotting label-prediction difference map
-# ax2 = fig1.add_subplot(4, 2, 1, aspect='equal')
+# ax2 = fig1.add_subplot(3, 2, 1, aspect='equal')
 # imp = plt.pcolor(x, y, diff_img[round(dataset.nlay/2),:,:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
 # cbar = plt.colorbar()
 # cbar.set_label('Log Permeability '+ '\n' +'[millidarcy]', fontsize=fs, **hfont)
@@ -225,7 +225,7 @@ plt.clim(np.min(inp_img[round(dataset.nlay/2),:,:]), np.max(inp_img[round(datase
 # ax2.tick_params(axis='both', which='major', labelsize=fs)
 # plt.ylabel('Distance [cm]', fontsize=fs-3, **hfont)
 # plt.title('Log Permeability Difference Layer 10', fontsize=fs, fontweight='bold', **hfont)
-# plt.clim(np.min(np.percentile(lab_img[round(dataset.nlay/2),:,:].flatten(),[1,99])), np.max(np.percentile(lab_img[round(dataset.nlay/2),:,:].flatten(),[1,99])))
+# plt.clim(np.min(-1), np.max(1))
 
 ax2 = fig1.add_subplot(3, 2, 3, aspect='equal')
 imp = plt.pcolor(x, y, lab_img[round(dataset.nlay/2),:,:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
@@ -261,7 +261,7 @@ plt.title('Normalized Breakthrough Time Row 10', fontsize=fs, fontweight='bold',
 plt.clim(np.min(inp_img[:,round(dataset.nrow/2),:]), np.max(inp_img[:,round(dataset.nrow/2),:]))
 
 # #For plotting label-prediction difference map
-# ax2 = fig1.add_subplot(4, 2, 2, aspect='equal')
+# ax2 = fig1.add_subplot(3, 2, 2, aspect='equal')
 # imp = plt.pcolor(x, y, diff_img[:,round(dataset.nrow/2),:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
 # cbar = plt.colorbar()
 # cbar.set_label('Log Permeability '+ '\n' +'[millidarcy]', fontsize=fs, **hfont)
@@ -270,8 +270,7 @@ plt.clim(np.min(inp_img[:,round(dataset.nrow/2),:]), np.max(inp_img[:,round(data
 # ax2.tick_params(axis='both', which='major', labelsize=fs)
 # plt.ylabel('Distance [cm]', fontsize=fs-3, **hfont)
 # plt.title('Log Permeability Difference Row 10', fontsize=fs, fontweight='bold', **hfont)
-# plt.clim(np.min(np.percentile(lab_img[:,round(dataset.nrow/2),:].flatten(),[1,99])), np.max(np.percentile(lab_img[:,round(dataset.nrow/2),:].flatten(),[1,99])))
-
+# plt.clim(np.min(-1), np.max(1))
 
 ax2 = fig1.add_subplot(3, 2, 4, aspect='equal')
 imp = plt.pcolor(x, y, lab_img[:,round(dataset.nrow/2),:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
