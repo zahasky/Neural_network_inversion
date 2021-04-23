@@ -28,9 +28,9 @@ from temporal_moment_testing import mean_exp_bt_map
 # phi = 52.4/((3.1415*2.54**2)*10.3)
 # km2 = 1722*9.869233E-13/1000
 # Berea
-# data_filename = 'Berea_C1_6ml_2_3mm_cropped_nan'
-# phi = 42.0/((3.1415*2.54**2)*10)
-# km2 = 23.2*9.869233E-13/1000
+data_filename = 'Berea_C1_2ml_2_3mm_cropped_nan'
+phi = 42.0/((3.1415*2.54**2)*10)
+km2 = 23.2*9.869233E-13/1000
 # Edwards
 # data_filename = 'Edwards_2ml_2_3mm_cropped_nan'
 # phi = 85.6/((3.1415*2.54**2)*10.3)
@@ -40,9 +40,9 @@ from temporal_moment_testing import mean_exp_bt_map
 # phi = 52.2/((3.1415*2.54**2)*10.3)
 # km2 = 608*9.869233E-13/1000
 # Indiana
-data_filename = 'Indiana_4ml_2_3mm_cropped_nan'
-phi = 34.9/((3.1415*2.54**2)*10.3)
-km2 = 98.3*9.869233E-13/1000
+# data_filename = 'Indiana_4ml_2_3mm_cropped_nan'
+# phi = 34.9/((3.1415*2.54**2)*10.3)
+# km2 = 98.3*9.869233E-13/1000
 
 timestep = 4
 # =============================================================================
@@ -81,7 +81,7 @@ pet_data = pet_data.reshape(nrow, ncol, nslice, ntime)
 pet_data = pet_data[1:-1, 1:-1, :, :]
 
 # Plot at a few timesteps to make sure import is correct
-plot_2d(pet_data[:,11,:,timestep], dz, dy, 'concentration', cmap='OrRd')
+plot_2d(pet_data[:,:,5,timestep], dz, dy, 'concentration', cmap='OrRd')
 
 # call function for calculating arrival time quantiles
 at_array, at_array_norm, at_diff_norm = exp_arrival_map_function(pet_data, tstep, [dx, dy, dz], 0.5, 1)
@@ -92,14 +92,13 @@ plot_2d(at_diff_norm[:,11,:], dz, dy, 'arrival time', cmap='bwr')
 plot_2d(at_diff_norm[11,:,:], dz, dy, 'arrival time', cmap='bwr')
 
 ## 3D linear interpolation, this is done after arrival time calculation
-at_interp_3d, dz_interp = axial_linear_interp_3D(at_diff_norm, dx, dy, dz, 40)
+at_interp_3d, dz_interp = axial_linear_interp_3D(at_array, dx, dy, dz, 40)
 plot_2d(at_interp_3d[:,11,:], dz_interp, dy, 'interp arrival time', cmap='bwr')
 
 # save normalized breakthrough data
-save_filename_atdn = 'arrival_time_data'  + '\\' + data_filename[:-12] + '_at_norm.csv'
+save_filename_atdn = 'pet_arrival_time_data'  + '\\' + data_filename[:-12] + '_at.csv'
 save_data = np.append(at_interp_3d.flatten('C'), [km2])
 np.savetxt(save_filename_atdn, save_data, delimiter=',')
-
 
 
 # bt_array, bt_array_norm, bt_diff_norm, M0, M1, M2 = mean_exp_bt_map(pet_data, tstep, [dx, dy, dz], v)

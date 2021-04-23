@@ -35,18 +35,19 @@ from flopy_arrival_time_3d_functions import mt3d_pulse_injection_sim, flopy_arri
 
 ## LAPTOP PATHS
 # names of executable with path IF NOT IN CURRENT DIRECTORY
-# exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
-# exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
+exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
+exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # DELL 419 PATHS
 # names of executable with path IF NOT IN CURRENT DIRECTORY
-exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
-exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
+# exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
+# exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # directory to save data
-directory_name = 'arrival_time_maps'
-# workdir = os.path.join('.', '3D_fields', directory_name)
-workdir = os.path.join('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arrival', directory_name)
+# directory_name = 'arrival_time_maps'
+directory_name = 'examples'
+workdir = os.path.join('.', '3D_fields', directory_name)
+# workdir = os.path.join('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arrival', directory_name)
 
 # uncomment if you want the information about numpy, matplotlib, and flopy printed    
 # print(sys.version)
@@ -56,8 +57,8 @@ workdir = os.path.join('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arriv
 
 # Set path to perm maps
 # perm_field_dir = os.path.join('.')
-# perm_field_dir = os.path.join('.', '3D_perm')
-perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arrival\\syn_core_perm_maps')
+perm_field_dir = os.path.join('.', '3D_fields', directory_name)
+# perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arrival\\syn_core_perm_maps')
 
 # Import core shape mask
 core_mask = np.loadtxt('core_template.csv', delimiter=',')
@@ -86,8 +87,8 @@ start_td = time.time() # start a timer
 # value of back up realizations to draw from
 replacement_counter = 40
 
-td = 876
-while td < 3404:
+td = 4
+while td < 5:
     
     print('TRAINING DATASET: ' + str(td))
        
@@ -192,9 +193,11 @@ print('Minutes to run 20,000 training simulations: ', (end_td - start_td)/60) # 
 y, x = np.mgrid[slice(0, Ly + grid_size[1], grid_size[1]),
                   slice(0, Lx + grid_size[2], grid_size[2])]
 # layer to plot
-ilayer = 8
+ilayer = 10
 # # fontsize
-fs = 18
+fs = 24
+
+hfont = {'fontname':'Arial'}
 
 # # Crossection of core
 # xc, yc = np.mgrid[slice(0, Ly + grid_size[1], grid_size[1]),
@@ -223,13 +226,14 @@ tdata_norm = tdata_norm.reshape(nlay, nrow, ncol)
 
 fig1 = plt.figure(figsize=(10, 5))
 ax0 = fig1.add_subplot(1, 1, 1, aspect='equal')
-imp = plt.pcolor(x, y, raw_km2[ilayer,:,:], cmap='gray', edgecolors='k', linewidths=0.2)
+plot_km2 = np.log(raw_km2[ilayer,:,:]/9.869233E-13)
+imp = plt.pcolor(x, y, plot_km2, cmap='Greys', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 # plt.clim(0,1) 
-cbar.set_label('[m^2]', fontsize=fs)
+cbar.set_label('ln[Darcy]', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Permeability', fontsize=fs+2)
+plt.title('Permeability', fontsize=fs+2, **hfont)
 
 
 # First figure with concentration data
@@ -238,57 +242,60 @@ ax0 = fig1.add_subplot(3, 1, 1, aspect='equal')
 imp = plt.pcolor(x, y, conc[5,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,0.4) 
-cbar.set_label('Solute concentration', fontsize=fs)
+cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f min' %timearray[5], fontsize=fs+2)
+plt.title('Time: %1.1f min' %timearray[5], fontsize=fs+2, **hfont)
 
 ax1 = fig1.add_subplot(3, 1, 2, aspect='equal')
 imp = plt.pcolor(x, y, conc[20,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,0.4) 
-cbar.set_label('Solute concentration', fontsize=fs)
+cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax1.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f min' %timearray[20], fontsize=fs+2)
+plt.title('Time: %1.1f min' %timearray[20], fontsize=fs+2, **hfont)
 
 ax2 = fig1.add_subplot(3, 1, 3, aspect='equal')
 imp = plt.pcolor(x, y, conc[35,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,0.4) 
-cbar.set_label('Solute concentration', fontsize=fs)
+cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax2.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f min' %timearray[35], fontsize=fs+2)
-plt.ylabel('Distance [cm]', fontsize=fs)
+plt.title('Time: %1.1f min' %timearray[35], fontsize=fs+2, **hfont)
+plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
 
 # Second figure with head and breakthrough time difference maps
 fig2 = plt.figure(figsize=(10, 15))
 ax0 = fig2.add_subplot(3, 1, 1, aspect='equal')
 dp_pressures = at_array[ilayer,:,:]
-imp = plt.pcolor(x, y, dp_pressures, cmap='BuGn', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, dp_pressures, cmap='Purples', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0, np.max(dp_pressures)) 
-cbar.set_label('Time [min]', fontsize=fs)
+cbar.set_label('Time [min]', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('0.50 Quantile Arrival Time [-]', fontsize=fs+2)
+plt.title('0.50 Quantile Arrival Time [min]', fontsize=fs+2, **hfont)
 
 ax1 = fig2.add_subplot(3, 1, 2, aspect='equal')
-imp = plt.pcolor(x, y, at_array_norm[ilayer,:,:], cmap='YlGn', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, at_array_norm[ilayer,:,:], cmap='Blues', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 # plt.clim(0,1) 
-cbar.set_label('PV [-]', fontsize=fs)
+cbar.set_label('PV [-]', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax1.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('0.50 Quantile Arrival Time [-]', fontsize=fs+2)
+plt.title('0.50 Quantile Arrival Time [-]', fontsize=fs+2, **hfont)
 
 ax2 = fig2.add_subplot(3, 1, 3, aspect='equal')
-imp = plt.pcolor(x, y, tdata_norm[ilayer,:,:], cmap='RdYlBu_r', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, tdata_norm[ilayer,:,:], cmap='PiYG', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
-cbar.set_label('Pore Volumes', fontsize=fs)
+cbar.set_label('Pore Volumes', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
-ax2.set_xlabel('Distance from inlet [cm]', fontsize=fs)
+ax2.set_xlabel('Distance from inlet [cm]', fontsize=fs, **hfont)
 ax2.tick_params(axis='both', which='major', labelsize=fs)
-plt.ylabel('Distance [cm]', fontsize=fs)
-plt.title('Quantile Arrival Difference', fontsize=fs+2)
+plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
+plt.title('Quantile Arrival Time Difference', fontsize=fs+2, **hfont)
+clim_pv = np.max(np.abs([np.max(tdata_norm), np.min(tdata_norm)]))
+plt.clim(-clim_pv, clim_pv)
+

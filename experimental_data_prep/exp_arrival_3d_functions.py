@@ -124,8 +124,8 @@ def plot_2d(map_data, dx, dy, colorbar_label, cmap):
     # x, y = np.mgrid[slice(0, Lx + dx, dx), slice(0, Ly + dy, dy)]
     
   
-    x_coord = np.linspace(dx/2, dx*c, c)
-    y_coord = np.linspace(dy/2, dy*r, r)
+    x_coord = np.linspace(0, dx*c, c+1)
+    y_coord = np.linspace(0, dy*r, r+1)
     
     X, Y = np.meshgrid(x_coord, y_coord)
     # print(slice(0, Ly + dy, dy))
@@ -150,6 +150,8 @@ def plot_2d(map_data, dx, dy, colorbar_label, cmap):
     cbar.ax.tick_params(labelsize= (fs-2)) 
     # make axis fontsize bigger!
     plt.tick_params(axis='both', which='major', labelsize=fs)
+    plt.xlim((0, dx*c)) 
+    plt.ylim((0, dy*r)) 
     # Label x-axis
     plt.gca().invert_yaxis()
     

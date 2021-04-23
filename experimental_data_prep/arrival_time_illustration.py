@@ -7,6 +7,11 @@ Created on Tue Mar 23 17:44:19 2021
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rc
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('font',**{'family':'serif','serif':['Arial']})
+fs = 16
+plt.rcParams['font.size'] = fs
 
 def quantile_function(btc_1d, timearray, quantile, t_increment):
     # first moment calculation
@@ -14,7 +19,7 @@ def quantile_function(btc_1d, timearray, quantile, t_increment):
     m1 = np.trapz(btc_1d*timearray, timearray)
     M1 = m1/m0
         
-    for i in range(2, ntime):
+    for i in range(1, ntime):
         M0i = np.trapz(btc_1d[:i], timearray[:i])
     
         if M0i/m0 > quantile:
@@ -33,7 +38,7 @@ def quantile_function(btc_1d, timearray, quantile, t_increment):
             
             break
         # output the line that is being used for linear interpolation of quantile
-        x = np.arange(timearray[i-2], timearray[i-1], t_increment)
+        x = np.arange(timearray[i-1], timearray[i]+t_increment, t_increment)
         
     return tau, M1, x, m, b
 
@@ -41,11 +46,14 @@ def quantile_function(btc_1d, timearray, quantile, t_increment):
 
 
 # ketton
-data_filename = 'Ketton_4ml_1_2_3mm_cropped_nan'
-phi = 48.7/((3.1415*2.54**2)*10)
-km2 = 1920*9.869233E-13/1000
+data_filename = 'Ketton_2ml_2_3mm_cropped_nan'
+# phi = 48.7/((3.1415*2.54**2)*10)
+pv = 48.7
+# Berea
+# data_filename = 'Berea_C1_2ml_2_3mm_cropped_nan
 
 timestep = 4
+
 # =============================================================================
 # LOAD SELECTED EXAMPLE DATA 
 # =============================================================================
@@ -77,51 +85,90 @@ pet_data = pet_data.reshape(nrow, ncol, nslice, ntime)
 # crop edges
 pet_data = pet_data[1:-1, 1:-1, :, :]
 
-C1d = np.nansum(np.nansum(pet_data, 0), 0)
-timearray = np.arange(tstep/2, tstep*ntime, tstep)
-# # BTC at a given location
-# btc_1d = C1d[-1,:]
 
-btc_1d = pet_data[0,7, 3,:]
-    
+timearray = np.arange(tstep/2, tstep*ntime, tstep)/60
+pv_array = timearray*q/pv
+
+btc_1d = pet_data[10,10, 5,:]
+btc_1d2 = pet_data[10,10, 30,:]
     
 quantile = 0.5
 t_increment = 1
 
 tau, M1, x, m, b = quantile_function(btc_1d, timearray, quantile, t_increment)
+tau2, M12, x2, m2, b2 = quantile_function(btc_1d2, timearray, quantile, t_increment)
+
+# Berea
+data_filename = 'Berea_C1_2ml_2_3mm_cropped_nan'
+pv_ber = 42.0
+# Import data
+all_data = np.loadtxt(data_dir + '\\' + data_filename + '.csv', delimiter=',')
+
+tstep = all_data[-6] # timstep length (sec)
+ntime = int(all_data[-7])
+nslice = int(all_data[-8])
+nrow = int(all_data[-10])
+ncol = int(all_data[-9])
+# calculate tracer injection duration in seconds
+tracer_inj_duration = tracer_volume/q*60 
+
+# crop off dataset information
+pet_data = all_data[0:-10]
+# reshape from imported column vector to 4D matrix
+pet_data = pet_data.reshape(nrow, ncol, nslice, ntime)
+# crop edges
+pet_data = pet_data[1:-1, 1:-1, :, :]
+
+# define time array
+timearray_ber = np.arange(tstep/2, tstep*ntime, tstep)/60
+pv_array_ber = timearray_ber*q/pv_ber
+
+btc_1d_ber = pet_data[10,10, 5,:]
+btc_1d2_ber = pet_data[10,10, 30,:]
+
+tau_ber, M1_ber, x, m, b = quantile_function(btc_1d_ber, timearray_ber, quantile, t_increment)
+tau2_ber, M12_ber, x2, m2, b2 = quantile_function(btc_1d2_ber, timearray_ber, quantile, t_increment)
     
-plt.figure(figsize=(8, 4), dpi=200)
-plt.plot(timearray, btc_1d, '-ok')
-plt.plot(x, m*x+b, '--r')
 
-plt.plot([tau, tau], [0, np.max(btc_1d)], label = '0.5 quantile')
-plt.plot([M1, M1], [0, np.max(btc_1d)], 'g', label = 'normalized first moment')
-plt.legend()
-plt.xlabel('Time [min]')
+n = 10
+colors = np.flipud(plt.cm.Greys(np.linspace(0,1,n)))
+bcolors = np.flipud(plt.cm.Blues(np.linspace(0,1,n)))
+rcolors = np.flipud(plt.cm.Reds(np.linspace(0,1,n)))
+
+fig0, (ax01, ax02) =  plt.subplots(1, 2, figsize=(14, 4), dpi=400)
+
+ax01.plot(pv_array_ber, btc_1d_ber, '.-', color=colors[1], label = 'voxel BTC (10,10,5)')
+# ax01.plot(x, m*x+b, '--r')
+ax01.plot([tau_ber*q/pv_ber, tau_ber*q/pv_ber], [0, 1], color=bcolors[2], label = '0.5 quantile (10,10,5)')
+ax01.plot([M1_ber*q/pv_ber, M1_ber*q/pv_ber], [0, 1],  color=rcolors[2], label = 'normalized first moment (10,10,5)')
+
+ax01.plot(pv_array_ber, btc_1d2_ber, '.-', color=colors[4], label = 'voxel BTC (10,10,30)')
+# ax01.plot(x2, m2*x2+b2, '--r')
+ax01.plot([tau2_ber*q/pv_ber, tau2_ber*q/pv_ber], [0, 1],  color=bcolors[5], label = '0.5 quantile (10,10,30)')
+ax01.plot([M12_ber*q/pv_ber, M12_ber*q/pv_ber], [0, 1],  color=rcolors[5], label = 'normalized first moment (10,10,30)')
+
+ax01.legend(prop={"size":fs-2}, bbox_to_anchor=(1.0, -0.55), loc='lower center', ncol = 2)
+ax01.set_xlabel('Pore Volumes [-]')
+ax01.set_ylabel('PET Units [nCi/cm$^2$]')
+ax01.set_title('Berea', fontsize=fs+2)
+ax01.set_ylim([0, 0.05])
+ax01.set_xlim([0, 2])
+ax01.tick_params(axis='both', which='major', labelsize=fs-2)
 
 
-# Play around with plotting volumes
-import plotly.graph_objects as go
+ax02.plot(pv_array, btc_1d, '.-', color=colors[1])
+ax02.plot([tau*q/pv, tau*q/pv], [0, 1], color=bcolors[2])
+ax02.plot([M1*q/pv, M1*q/pv], [0, 1],  color=rcolors[2])
 
-pet_at_dir = 'C:\\Users\\zahas\\Dropbox\\Matlab\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_arrival_time_data'
-# Import arrival time data
-arrival_data = np.loadtxt(pet_at_dir + '\\Berea_C1_1ml_2_3mm_at_norm' + '.csv', delimiter=',')
-arrival_data = arrival_data[0:-1]
-arrival_data = arrival_data.reshape(nrow-2, ncol-2, nslice-1)
+ax02.plot(pv_array, btc_1d2, '.-', color=colors[4])
+ax02.plot([tau2*q/pv, tau2*q/pv], [0, 1],  color=bcolors[5])
+ax02.plot([M12*q/pv, M12*q/pv], [0, 1],  color=rcolors[5])
+
+# ax02.legend(prop={"size":fs-2})
+ax02.set_xlabel('Pore Volumes [-]')
+ax02.set_ylabel('PET Units [nCi/cm$^2$]')
+ax02.set_title('Ketton', fontsize=fs+2)
+ax02.set_ylim([0, 0.05])
+ax02.set_xlim([0, 2])
+ax02.tick_params(axis='both', which='major', labelsize=fs-2)
     
-X, Y, Z = np.meshgrid(np.linspace(dx/2, (nrow-2)*dx+dx/2, num=(nrow-2)), \
-                      np.linspace(dy/2, (ncol-2)*dy+dy/2, num=(ncol-2)), \
-                      np.linspace(dz/2, (nslice-2)*dz+dz/2, num=(nslice-1)))
-# values = np.sin(X*Y*Z) / (X*Y*Z)
-
-fig = go.Figure(data=go.Volume(
-    x=X.flatten(),
-    y=Y.flatten(),
-    z=Z.flatten(),
-    value=arrival_data.flatten(),
-    isomin=0.1,
-    isomax=0.8,
-    opacity=0.1, # needs to be small to see through all surfaces
-    surface_count=17, # needs to be a large number for good volume rendering
-    ))
-fig.show()

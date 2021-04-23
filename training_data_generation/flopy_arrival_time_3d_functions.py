@@ -263,7 +263,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, perlen_mf, np
     dsp = flopy.mt3d.Mt3dDsp(mt, al=al, trpt=trpt)
     # Reactions package (optional)
     # rct = flopy.mt3d.Mt3dRct(mt, isothm=1, ireact=1, igetsc=0, rhob=rhob, sp1=kd, 
-    #                          rc1=lambda1, rc2=lambda1)
+    #                           rc1=lambda1, rc2=lambda1)
     # source and sink mixing package
     ssm = flopy.mt3d.Mt3dSsm(mt, stress_period_data=spd_mt)
     gcg = flopy.mt3d.Mt3dGcg(mt)
