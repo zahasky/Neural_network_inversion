@@ -56,7 +56,7 @@ core_mask = np.loadtxt('core_mask.csv', delimiter=',')
 generate_fields = True
 
 # number of training datasets desired
-ntraining_data = 26000
+ntraining_data = 3
 # number of extra datasets to generate in case of sim or at calc failure
 extra_sets = 100
 
@@ -102,7 +102,7 @@ start_td = time.time() # start a timer
 # value of back up realizations to draw from
 replacement_counter = ntraining_data + 1
 
-td = 1
+td = 2
 while td < ntraining_data:
     
     print('TRAINING DATASET: ' + str(td))
@@ -116,8 +116,6 @@ while td < ntraining_data:
         srf = gs.SRF(model, seed=20170519)
         # permeability field in millidarcy
         field = 10**(srf.structured([np.arange(nlay), np.arange(nrow), np.arange(ncol)]) + p[1])
-        # check for negative values
-        field[field<0] = 1
         print('GS model mean perm: '+ str(10**p[1]) + ' mD')
         # convert from mD to km^2
         field_km2 = field*(9.869233E-13/1000)

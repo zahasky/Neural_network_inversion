@@ -56,7 +56,7 @@ core_mask = np.loadtxt('core_mask.csv', delimiter=',')
 generate_fields = True
 
 # number of training datasets desired
-ntraining_data = 26000
+ntraining_data = 6
 # number of extra datasets to generate in case of sim or at calc failure
 extra_sets = 100
 

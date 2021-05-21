@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-flopy_arrival_time_3d_diff_generation.py
+flopy_bt_time_3d_diff_generation.py
 Created on Fri Jun  5 08:23:38 2020
 
 @author: Christopher Zahasky
 
-This script is used to generate 3D arrival time maps using synthetically 
+This script is used to generate 3D breakthrough time maps using synthetically 
 generated 3D permeability fields. This script calls functions from the python
 script titled 'flopy_bt_3d_functions.py'
 """
@@ -15,84 +15,69 @@ import sys
 import os
 import shutil
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-import time
 
-# Packages for random field generation
-import gstools as gs
-from skopt.sampler import Lhs
+# import math
+import time
 
 # Import custom functions to run flopy stuff, the calls should be structured as:
 # from file import function
 from flopy_arrival_time_3d_functions import mt3d_pulse_injection_sim, flopy_arrival_map_function, plot_2d
 
+# # run installed version of flopy or add local path
+# try:
+#     import flopy
+# except:
+#     fpth = os.path.abspath(os.path.join('..', '..'))
+#     sys.path.append(fpth)
+#     import flopy
+
 ## LAPTOP PATHS
 # names of executable with path IF NOT IN CURRENT DIRECTORY
-# exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
-# exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
+exe_name_mf = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
+exe_name_mt = 'C:\\Users\\zahas\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # DELL 419 PATHS
 # names of executable with path IF NOT IN CURRENT DIRECTORY
-exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
-exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
+# exe_name_mf = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mf2005'
+# exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 
 # directory to save data
-# directory_name = 'examples'
-# workdir = os.path.join('.', '3D_fields', directory_name)
-directory_name = 'arrival_time_maps'
-workdir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k', directory_name)
+# directory_name = 'arrival_time_maps'
+directory_name = 'examples'
+workdir = os.path.join('.', '3D_fields', directory_name)
+# workdir = os.path.join('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arrival', directory_name)
+
+# uncomment if you want the information about numpy, matplotlib, and flopy printed    
+# print(sys.version)
+# print('numpy version: {}'.format(np.__version__))
+# print('matplotlib version: {}'.format(mpl.__version__))
+# print('flopy version: {}'.format(flopy.__version__))
 
 # Set path to perm maps
 # perm_field_dir = os.path.join('.')
-# perm_field_dir = os.path.join('.', '3D_fields', directory_name)
-perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\syn_core_perm_maps')
+perm_field_dir = os.path.join('.', '3D_fields', directory_name)
+# perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arrival\\syn_core_perm_maps')
 
 # Import core shape mask
-core_mask = np.loadtxt('core_mask.csv', delimiter=',')
+core_mask = np.loadtxt('core_template.csv', delimiter=',')
+core_mask = core_mask.reshape(20, 20)
 
-# =============================================================================
-# PARAMETER SPACE DEFINITION
-# =============================================================================
-generate_fields = True
-
-# number of training datasets desired
-ntraining_data = 26000
-# number of extra datasets to generate in case of sim or at calc failure
-extra_sets = 100
-
-if generate_fields == True:
-    lhs = Lhs(lhs_type="classic", criterion=None)
-    
-    # log_var, log_mD(10 mD to 20 D), x len, y len, z len, rotation x, rotation y, rotation z
-    Ps = lhs.generate([(-4., -0.5), (1.0, 4.3), (1.0, 50.), (1.0, 50.0), (1.0, 50.0), \
-                      (0.0, 1.57), (0.0, 1.57), (0.0, 1.57), (1,3)], ntraining_data + extra_sets)
-    
-    # example of how to efficiently save data to text file    
-    np.savetxt('parameter_space_26k.csv', Ps , delimiter=',', fmt='%.3e')
-else:
-    Ps = np.loadtxt('parameter_space_26k.csv', delimiter=',')
-    
 # =============================================================================
 # VARIABLES THAT DON'T CHANGE
 # =============================================================================
 # grid_size = [grid size in direction of Lx (layer thickness), 
     # Ly (left to right axis when looking down the core), Lz (long axis of core)]
-grid_size = [0.23291, 0.23291, 0.25] # selected units [cm]
-# grid dimensions
-nlay = 20 # number of layers / grid cells
-nrow = 20 # number of columns 
-ncol = 40 # number of slices (parallel to axis of core)
-
+grid_size = [0.23291, 0.23291, 0.2388] # selected units [cm]
 # Output control for MT3dms
 # nprs (int):  the frequency of the output. If nprs > 0 results will be saved at 
 # the times as specified in timprs (evenly allocated between 0 and sim run length); 
 # if nprs = 0, results will not be saved except at the end of simulation; if NPRS < 0, simulation results will be 
 # saved whenever the number of transport steps is an even multiple of nprs. (default is 0).
 nprs = 150 
-# period length in selected units (minutes)
-# the first period is fluid pressure equilibration, the second period is tracer
-# injection, the third period is tracer displacement
-perlen_mt = [2., 1., 90]
+# period length in selected units (for steady state flow it can be set to anything)
+perlen_mf = [2., 1., 90]
 # Numerical method flag
 mixelm = -1
 
@@ -100,81 +85,78 @@ mixelm = -1
 start_td = time.time() # start a timer
 
 # value of back up realizations to draw from
-replacement_counter = ntraining_data + 1
+replacement_counter = 40
 
-td = 1
-while td < ntraining_data:
+td = 3
+while td < 4:
     
     print('TRAINING DATASET: ' + str(td))
        
-    # ========================================================================
-    # PERMEABILITY FIELD GENERATION
-    # ========================================================================
-    p = Ps[td]
-    if generate_fields == True:
-        model = gs.Exponential(dim=3, var=10**p[0], len_scale=[p[2], p[3], p[4]], angles=[p[5], p[6], p[7]])
-        srf = gs.SRF(model, seed=20170519)
-        # permeability field in millidarcy
-        field = 10**(srf.structured([np.arange(nlay), np.arange(nrow), np.arange(ncol)]) + p[1])
-        # check for negative values
-        field[field<0] = 1
-        print('GS model mean perm: '+ str(10**p[1]) + ' mD')
-        # convert from mD to km^2
-        field_km2 = field*(9.869233E-13/1000)
-        # set permeability values outside of core to zero with core mask
-        for col in range(ncol):
-            field_km2[:,:,col] = np.multiply(field_km2[:,:,col], core_mask)
-        
-        # Save data in small format
-        save_data = np.append(field_km2.flatten('C'), [nlay, nrow, ncol])
-        np.savetxt(perm_field_dir + '\\core_k_3d_m2_' + str(td)+'.csv', save_data , delimiter=',', fmt='%.3e')
-    else:
-        # Import permeability map
-        field_km2 = np.loadtxt(perm_field_dir + '\\core_k_3d_m2_' + str(td) +'.csv', delimiter=',')
-        field_km2 = field_km2.reshape(nlay, nrow, ncol)
+    # Import permeability map
+    tdata_km2 = np.loadtxt(perm_field_dir + '\\core_k_3d_m2_' + str(td) +'.csv', delimiter=',')
+    # Resave data in smaller format
+    np.savetxt(perm_field_dir + '\\core_k_3d_m2_' + str(td)+'.csv', tdata_km2 , delimiter=',', fmt='%.3e')
     
-    # number of dummy slices at inlet boundary
-    ndummy_in = int(p[8])  
+    # extract geometric information
+    nlay = int(tdata_km2[-3]) # number of layers / grid cells
+    nrow = int(tdata_km2[-2]) # number of columns 
+    ncol = int(tdata_km2[-1]) # number of slices (parallel to axis of core)
+    # crop data
+    tdata_km2 = tdata_km2[0:-3]
+
+    # Reshape to 3D array
+    raw_km2 = tdata_km2.reshape(nlay, nrow, ncol)
+    # this is the command needed if data isn't permuted before converting from matrix to vector in matlab
+    # raw_km2 = tdata_km2.reshape(nlay, nrow, ncol, order='F')
+    
+    # if defined, set permeability values outside of core to zero with core mask
+    # if 'core_mask' in locals():
+    #     for col in range(ncol):
+    #         raw_km2[:,:,col] = np.multiply(raw_km2[:,:,col], core_mask)
+    #         # save cropped hk data
+    #         save_cropped_perm_filename = perm_field_dir + '\\core_k_3d_m2_' + str(td) +'.csv'
+    #         save_data = np.append(raw_km2.flatten('C'), [nlay, nrow, ncol])
+    #         np.savetxt(save_cropped_perm_filename, save_data, delimiter=',')
+        
     # Convert permeabiltiy (in m^2) to hydraulic conductivity in cm/min
-    raw_hk = field_km2*(1000*9.81*100*60/8.9E-4)
+    raw_hk = raw_km2*(1000*9.81*100*60/8.9E-4)
     
     # Describe grid for results    
     Lx = (ncol) * grid_size[2]   # length of model in selected units 
     Ly = (nrow) * grid_size[1]   # length of model in selected units 
-    # number of dummy slices
-    ndummy_in = p[8]
+    
     # Model workspace and new sub-directory
     model_dirname = ('td'+ str(td))
     model_ws = os.path.join(workdir, model_dirname)
     
-    mf, mt, conc, timearray, km2_mean = mt3d_pulse_injection_sim(model_dirname, 
-                model_ws, raw_hk, grid_size, ndummy_in,  perlen_mt, nprs, 
-                mixelm, exe_name_mf, exe_name_mt)
+    mf, mt, conc, timearray, km2_mean = mt3d_pulse_injection_sim(model_dirname, model_ws, raw_hk, grid_size, perlen_mf, nprs, mixelm, exe_name_mf, exe_name_mt)
     # print('Core average perm: '+ str(km2_mean) + ' m^2')
     
     # Option to plot and calculate geometric mean to double check that core average perm in close
-    # raw_km2_array = field_km2.flatten()
+    # raw_km2_array = raw_km2.flatten()
     # index = np.argwhere(raw_km2_array > 0) 
     # geo_mean = np.exp(np.sum(np.log(raw_km2_array[index]))/index.size)
     # print('Geometric mean perm: ' + str(geo_mean) + ' m^2')
     
+    
     # calculate quantile arrival time map from MT3D simulation results
-    at_array, at_array_norm, at_diff_norm = flopy_arrival_map_function(conc, np.array(timearray), grid_size, 0.5)
+    at_array, at_array_norm, at_diff_norm = flopy_arrival_map_function(conc, np.array(timearray), grid_size, 0.5, 0.1)
     
     # In some cases the models may fail to run or there are issues with calculating arrival times
     # When this happens the realization is replaced with a random realization 
     # from a second sampling. This occurs less than 50 times in the entire 
     # 20,000 data initially generated
     if isinstance(at_diff_norm, int):
-        # replace parameters
-        Ps[td] = Ps[replacement_counter]
-        # resave parameter space information  
-        np.savetxt('parameter_space_26k.csv', Ps , delimiter=',', fmt='%.3e')
-        print('Training dataset: ' + str(td) + ', replaced with realization: ' + str(replacement_counter))
+        # Import permeability map
+        tdata_km2 = np.loadtxt('D:\\Training_data_generation_3D\\Tdata_3D_20K_with_arrival\\backup_core_maps' + '\\core_td_3dk_m2_' + str(replacement_counter) +'.csv', delimiter=',')
+        print('Training dataset replaced with: ' + '\\core_td_3dk_m2_' + str(replacement_counter))
+        # Replace bad realization with new dataset
+        np.savetxt(perm_field_dir + '\\core_k_3d_m2_' + str(td)+'.csv', tdata_km2 , delimiter=',', fmt='%.3e')
         # update replacement counter
         replacement_counter += 1
         continue
         
+    
     # =============================================================================
     # SAVE DATA 
     # =============================================================================
@@ -202,7 +184,7 @@ while td < ntraining_data:
     
 # Print final run time
 end_td = time.time() # end timer
-print('Minutes to run ' + str(ntraining_data) + ' training simulations: ', (end_td - start_td)/60) # show run time
+print('Minutes to run 20,000 training simulations: ', (end_td - start_td)/60) # show run time
     
 # =============================================================================
 # PLOT DATA 
@@ -217,13 +199,27 @@ fs = 24
 
 hfont = {'fontname':'Arial'}
 
+# # Crossection of core
+# xc, yc = np.mgrid[slice(0, Ly + grid_size[1], grid_size[1]),
+#                   slice(0, Ly + grid_size[0], grid_size[0])]
+# fig1 = plt.figure(figsize=(10, 5))
+# ax0 = fig1.add_subplot(1, 1, 1, aspect='equal')
+# imp = plt.pcolor(xc, yc, raw_km2[:,:,0], cmap='gray', edgecolors='k', linewidths=0.2)
+# cbar = plt.colorbar()
+# # plt.clim(0,1) 
+# cbar.set_label('[m^2]', fontsize=fs)
+# cbar.ax.tick_params(labelsize= (fs-2)) 
+# ax0.tick_params(axis='both', which='major', labelsize=fs)
+# plt.title('Permeability', fontsize=fs+2)
+
+# deriv_at = at_array_norm[:,:,1:]-at_array_norm[:,:,:-1]
+# plot_2d(deriv_at[:,11,:], grid_size[2], grid_size[1], 'arrival time', cmap='YlGn')
+
 
 n = 21
 colors = np.flipud(plt.cm.viridis(np.linspace(0,1,n)))
 r, c, s = np.shape(at_array_norm)
 x_coord = np.linspace(0, grid_size[2]*s, s)
-
-print(np.std(at_array_norm[:,:,0]))
 
 fig0, (ax01, ax02) =  plt.subplots(1, 2, figsize=(14, 4), dpi=400)
 for i in range(0,19):
@@ -235,22 +231,34 @@ load_km2 = tdata_norm[-1]
 tdata_norm = tdata_norm[0:-1]
 tdata_norm = tdata_norm.reshape(nlay, nrow, ncol)
     
-plot_km2 = field_km2[ilayer,:,:]/9.869233E-13*1000
-plot_2d(plot_km2, grid_size[1], grid_size[2], 'Permeability', cmap='Greys')
-# clim_pv = np.max(np.abs([np.max(plot_km2), np.min(plot_km2)]))
-# plt.clim(-clim_pv, clim_pv)
+# tdata_raw = np.loadtxt(save_filename_btd, delimiter=',')
+# load_km2 = tdata_raw[-1]
+# tdata_raw = tdata_raw[0:-1]
+# tdata_raw = tdata_raw.reshape(nlay, nrow, ncol)
+
+
+fig1 = plt.figure(figsize=(10, 5))
+ax0 = fig1.add_subplot(1, 1, 1, aspect='equal')
+plot_km2 = np.log(raw_km2[ilayer,:,:]/9.869233E-13)
+imp = plt.pcolor(x, y, plot_km2, cmap='Greys', edgecolors='k', linewidths=0.2)
+cbar = plt.colorbar()
+# plt.clim(0,1) 
+cbar.set_label('ln[Darcy]', fontsize=fs, **hfont)
+cbar.ax.tick_params(labelsize= (fs-2)) 
+ax0.tick_params(axis='both', which='major', labelsize=fs)
+plt.title('Permeability', fontsize=fs+2, **hfont)
+
 
 # First figure with concentration data
-pv = (np.array(timearray)-2)*(2/(3.1415*(2.5**2)*10*0.25))
 fig1 = plt.figure(figsize=(10, 15))
 ax0 = fig1.add_subplot(3, 1, 1, aspect='equal')
-imp = plt.pcolor(x, y, conc[12,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, conc[8,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,0.4) 
 cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f PV' %pv[12], fontsize=fs+2, **hfont)
+plt.title('Time: %1.1f min' %timearray[8], fontsize=fs+2, **hfont)
 
 ax1 = fig1.add_subplot(3, 1, 2, aspect='equal')
 imp = plt.pcolor(x, y, conc[20,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
@@ -259,19 +267,17 @@ plt.clim(0,0.4)
 cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax1.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f PV' %pv[20], fontsize=fs+2, **hfont)
+plt.title('Time: %1.1f min' %timearray[20], fontsize=fs+2, **hfont)
 
 ax2 = fig1.add_subplot(3, 1, 3, aspect='equal')
-imp = plt.pcolor(x, y, conc[45,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, conc[35,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,0.4) 
 cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax2.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f PV' %pv[45], fontsize=fs+2, **hfont)
+plt.title('Time: %1.1f min' %timearray[35], fontsize=fs+2, **hfont)
 plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
-
-
 
 # Second figure with head and breakthrough time difference maps
 fig2 = plt.figure(figsize=(10, 15))
@@ -306,13 +312,3 @@ plt.title('Quantile Arrival Time Difference', fontsize=fs+2, **hfont)
 clim_pv = np.max(np.abs([np.max(tdata_norm), np.min(tdata_norm)]))
 plt.clim(-clim_pv, clim_pv)
 
-gaussian_arr = np.random.normal(0,0.006, tdata_norm[:,:,0].shape)
-syn_data_inlet = tdata_norm[:,:,0]+gaussian_arr
-
-plot_2d(syn_data_inlet, grid_size[0], grid_size[1], 'arrival time', cmap='bwr')
-clim_pv = np.max(np.abs([np.max(syn_data_inlet), np.min(syn_data_inlet)]))
-plt.clim(-clim_pv, clim_pv)
-
-plot_2d(tdata_norm[:,:,0], grid_size[0], grid_size[1], 'arrival time', cmap='bwr')
-clim_pv = np.max(np.abs([np.max(syn_data_inlet), np.min(syn_data_inlet)]))
-plt.clim(-clim_pv, clim_pv)

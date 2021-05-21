@@ -44,7 +44,7 @@ km2 = 23.2*9.869233E-13/1000
 # phi = 34.9/((3.1415*2.54**2)*10.3)
 # km2 = 98.3*9.869233E-13/1000
 
-timestep = 4
+timestep = 10
 # =============================================================================
 # LOAD SELECTED EXAMPLE DATA 
 # =============================================================================
@@ -64,6 +64,7 @@ q = all_data[-5] # flow rate (ml/min)
 tstep = all_data[-6] # timstep length (sec)
 ntime = int(all_data[-7])
 nslice = int(all_data[-8])
+print(nslice)
 nrow = int(all_data[-10])
 ncol = int(all_data[-9])
 # calculate tracer injection duration in seconds
@@ -77,28 +78,56 @@ print('Expected advection velocity = ' + str(v))
 pet_data = all_data[0:-10]
 # reshape from imported column vector to 4D matrix
 pet_data = pet_data.reshape(nrow, ncol, nslice, ntime)
+# Flip data to orient top of cores to top of plot
+pet_data = np.flip(pet_data, 0)
 # crop edges
 pet_data = pet_data[1:-1, 1:-1, :, :]
 
+
 # Plot at a few timesteps to make sure import is correct
-plot_2d(pet_data[:,:,5,timestep], dz, dy, 'concentration', cmap='OrRd')
+plot_2d(pet_data[:,10,:,timestep], dz, dy, 'concentration', cmap='OrRd')
 
 # call function for calculating arrival time quantiles
 at_array, at_array_norm, at_diff_norm = exp_arrival_map_function(pet_data, tstep, [dx, dy, dz], 0.5, 1)
 
 plot_2d(at_array_norm[:,11,:], dz, dy, 'arrival time', cmap='YlGn')
-plot_2d(at_diff_norm[:,:,20], dx, dy, 'arrival time', cmap='bwr')
+plot_2d(at_diff_norm[:,:,0], dx, dy, 'arrival time', cmap='bwr')
+clim_pv = np.max(np.abs([np.max(at_diff_norm[:,:,0]), np.min(at_diff_norm[:,:,0])]))*0.1
+plt.clim(-clim_pv, clim_pv)
+
 plot_2d(at_diff_norm[:,11,:], dz, dy, 'arrival time', cmap='bwr')
 plot_2d(at_diff_norm[11,:,:], dz, dy, 'arrival time', cmap='bwr')
 
 ## 3D linear interpolation, this is done after arrival time calculation
-at_interp_3d, dz_interp = axial_linear_interp_3D(at_array, dx, dy, dz, 40)
+at_interp_3d, dz_interp = axial_linear_interp_3D(at_diff_norm, dx, dy, dz, 40)
 plot_2d(at_interp_3d[:,11,:], dz_interp, dy, 'interp arrival time', cmap='bwr')
 
-# save normalized breakthrough data
-save_filename_atdn = 'pet_arrival_time_data'  + '\\' + data_filename[:-12] + '_at.csv'
-save_data = np.append(at_interp_3d.flatten('C'), [km2])
-np.savetxt(save_filename_atdn, save_data, delimiter=',')
+# save normalized arrival time data
+# save_filename_atdn = 'pet_arrival_time_data'  + '\\' + data_filename[:-12] + '_at.csv'
+# save_data = np.append(at_interp_3d.flatten('C'), [km2])
+# np.savetxt(save_filename_atdn, save_data, delimiter=',')
+
+# deriv_at = at_interp_3d[:,:,1:]-at_interp_3d[:,:,:-1]
+# plot_2d(deriv_at[:,11,:], dz, dy, 'arrival time', cmap='YlGn')
+
+core_mask = pet_data[:,:,0,0]
+core_mask[core_mask>0]=1
+core_mask[np.isnan(core_mask)]=0
+np.savetxt('core_mask.csv', core_mask , delimiter=',', fmt='%.1f')
+
+plot_2d(core_mask, dx, dy, 'concentration', cmap='viridis')
+
+
+# n = 21
+# colors = np.flipud(plt.cm.viridis(np.linspace(0,1,n)))
+# r, c, s = np.shape(at_array_norm)
+# x_coord = np.linspace(0, dz*s, s)
+
+
+# fig0, (ax01, ax02) =  plt.subplots(1, 2, figsize=(14, 4), dpi=400)
+# for i in range(0,19):
+#     ax01.plot(x_coord, at_interp_3d[i,11,:], '.-', color=colors[i])
+#     ax02.plot(x_coord, at_interp_3d[11,i,:], '.-', color=colors[i])
 
 
 # bt_array, bt_array_norm, bt_diff_norm, M0, M1, M2 = mean_exp_bt_map(pet_data, tstep, [dx, dy, dz], v)

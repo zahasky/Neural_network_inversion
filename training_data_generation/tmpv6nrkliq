@@ -67,7 +67,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, ndummy_in, pe
     # NOTE: that the there are two additional columns added as dummy slices (representing coreholder faces)
     hk_size = raw_hk.shape
     # determine dummy slice perm based on maximum hydraulic conductivity
-    dummy_slice_hk = raw_hk.max()*10
+    dummy_slice_hk = raw_hk.max()
     # define area with hk values above zero
     core_mask = np.ones((hk_size[0], hk_size[1]))
     core_mask = np.multiply(core_mask, raw_hk[:,:,0])
@@ -373,7 +373,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, ndummy_in, pe
     heads = hdobj.get_data()
     
     # set inactive cell pressures to zero, by default inactive cells have a pressure of -999
-    # heads[heads < -990] = 0
+    heads[heads < -990] = 0
     
     # convert heads to pascals
     if lenuni == 3: # centimeters
@@ -384,24 +384,23 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, ndummy_in, pe
             
     
     # crop off extra concentration slices
-    conc = conc[:,:,:,ndummy_in+1:-1]
+    conc = conc[:,:,:,(1+ndummy_in):-1]
     
     # calculate pressure drop
-    # crop off extra pressure slices
-    # pressures = pressures[:,:,ndummy_in:-2] # commented out since not returned
-    # calculate 
-    p_inlet = pressures[:, :, ndummy_in+1]*core_mask
-    p_inlet = np.mean(p_inlet[p_inlet>1])
-    # print(p_inlet)
-    p_outlet = pressures[:, :, -1]*core_mask
-    p_outlet = np.mean(p_outlet[p_outlet>1])
-    dp = p_inlet-p_outlet
+    center = round(nrow/2)
+    # dp = np.mean(pressures[center-3:center+2, center-3:center+2, 0]) - np.mean(pressures[center-3:center+2, center-3:center+2, -1])
     # print('Pressure drop: '+ str(dp/1000) + ' kPa')
+    
+    # crop off extra pressure slices
+    # pressures = pressures[:,:,(1+ndummy_in):-1]
+    dp = np.mean(pressures[center-3:center+2, center-3:center+2, (1+ndummy_in)]) - np.mean(pressures[center-3:center+2, center-3:center+2, -1])
+    pressures = pressures[:,:,(1+ndummy_in):-1]
+    print(pressures.shape)
     
     # calculate mean permeability from pressure drop
     # water viscosity
     mu_water = 0.00089 # Pa.s
-    L = hk_size[2]*delc
+    L = (hk_size[2]*delc)
     km2_mean = (q_total/mask_area)*L*mu_water/dp /(60*100**2)
     
     print('Core average perm: '+ str(km2_mean/9.869233E-13*1000) + ' mD')
@@ -410,6 +409,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, ndummy_in, pe
     geo_mean_K = np.exp(np.sum(np.log(raw_hk[raw_hk>0]))/len(raw_hk[raw_hk>0]))
     geo_mean_km2 = geo_mean_K/(1000*9.81*100*60/8.9E-4)
     print('Geometric mean perm: ' + str(geo_mean_km2/9.869233E-13*1000) + ' mD')
+    
 
     # Print final run time
     end_time = time.time() # end timer

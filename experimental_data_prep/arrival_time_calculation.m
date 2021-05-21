@@ -6,7 +6,7 @@ close all
 set(0,'DefaultAxesFontSize',17, 'defaultlinelinewidth', 2,...
     'DefaultAxesTitleFontWeight', 'normal')
 
-addpath('C:\Users\zahas\Dropbox\Matlab\high_res_images')
+addpath('C:\Users\zahas\Dropbox\Codes\high_res_images')
 arrival_color = cbrewer('seq', 'YlGn', 60 , 'linear');
 velo_color = flipud(cbrewer('div', 'RdYlBu', 60 , 'linear'));
 
@@ -20,23 +20,23 @@ velo_color = flipud(cbrewer('div', 'RdYlBu', 60 , 'linear'));
 % inj_pv = 4;
 
 % Berea
-% addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\BSS_c1\june_17_pet\6_12_single_phase')
-% load('BSS_c1_2ml_2_3mm_vox')
+addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\BSS_c1\june_17_pet\6_12_single_phase')
+load('BSS_c1_2ml_2_3mm_vox')
 % timestep length in seconds
-% timestep_length = 60;
+timestep_length = 60;
 % injected pulse volume [mL]
-% inj_pv = 4;
+inj_pv = 4;
 
 % Bentheimer
-addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\Bentheimer_imperial')
-load('Bentheimer_4ml_2_3mm_vox')
-% timestep length in seconds
-timestep_length = 47;
-% injected pulse volume [mL]
-inj_pv = 2;
+% addpath('C:\Users\zahas\Dropbox\Research\Experiment stuff\Data\Stanford_data\Bentheimer_imperial')
+% load('Bentheimer_4ml_2_3mm_vox')
+% % timestep length in seconds
+% timestep_length = 47;
+% % injected pulse volume [mL]
+% inj_pv = 2;
 
 % flow rate [mL/min]
-q = 4;
+q = 2;
 % Image voxel size
 vox_size = [0.2329 0.2329 0.2388];
 % noise threshold
@@ -130,8 +130,8 @@ axis([0 10 max(gridY)/2 max(gridY)+0.1 0 max(gridX)])
 grid on
 xticks([0, 2, 4, 6, 8, 10])
 xlabel('Distance from inlet [cm]')
-set(gca,'ZTickLabel',[]);
-set(gca,'YTickLabel',[]);
+% set(gca,'ZTickLabel',[]);
+% set(gca,'YTickLabel',[]);
 view(-30,27)
 set(gca,'color','none')
 
@@ -168,8 +168,8 @@ grid on
 xticks([0, 2, 4, 6, 8, 10])
 
 xlabel('Distance from inlet [cm]')
-set(gca,'ZTickLabel',[]);
-set(gca,'YTickLabel',[]);
+% set(gca,'ZTickLabel',[]);
+% set(gca,'YTickLabel',[]);
 view(-30,27)
 set(gca,'color','none')
 

@@ -384,17 +384,19 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, grid_size, ndummy_in, pe
             
     
     # crop off extra concentration slices
-    conc = conc[:,:,:,ndummy_in+1:-1]
+    conc = conc[:,:,:,ndummy_in:-2]
     
     # calculate pressure drop
     # crop off extra pressure slices
     # pressures = pressures[:,:,ndummy_in:-2] # commented out since not returned
     # calculate 
-    p_inlet = pressures[:, :, ndummy_in+1]*core_mask
-    p_inlet = np.mean(p_inlet[p_inlet>1])
+    p_inlet = pressures[:, :, -1]*core_mask
+    p_inlet = np.mean(p_inlet>1)
     # print(p_inlet)
     p_outlet = pressures[:, :, -1]*core_mask
-    p_outlet = np.mean(p_outlet[p_outlet>1])
+    p_outlet = np.mean(p_outlet>1)
+    print(pressures[:, :, ndummy_in]*core_mask)
+    print(p_outlet)
     dp = p_inlet-p_outlet
     # print('Pressure drop: '+ str(dp/1000) + ' kPa')
     

@@ -8,39 +8,24 @@ Created on Wed Feb  3 14:01:50 2021
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator
+from scipy import integrate
 import time
 
-def quantile_calc(btc_1d, timearray, quantile, t_increment):
-    # find length of time array
-    ntime = timearray.shape[0]
-    # calculate zero moment
-    M0 = np.trapz(btc_1d, timearray)
-    # reset incremental quantile numerator tracker
-    M0im = 0
-
-    for i in range(1, ntime):
-        # numerically integrate from the beginning to the end of the dataset
-        M0i = np.trapz(btc_1d[:i], timearray[:i])
-        # check to see if the quantile has been surpassed, if so then linearly 
-        # interpolate between the current measurement and the previous measurement
-        if M0i/M0 > quantile:
-            # recalculate the integral of the previous measurement (i-1)
-            M0im = np.trapz(btc_1d[:i-1], timearray[:i-1])
-            # linear interpolation
-            m = (btc_1d[i-1] - btc_1d[i-2])/(timearray[i-1] - timearray[i-2])
-            b = btc_1d[i-2] - m*timearray[i-2]
-            # now search through the space between the two measurements to find 
-            # when the area under the curve is equal to the desired quantile
-            for xt in np.arange(timearray[i-2], timearray[i-1] +t_increment, t_increment):
-                # calculate the linearly interpolated area under the curve
-                M0int = M0im + np.trapz([btc_1d[i-2], m*xt+b], [timearray[i-2], xt])
-            
-                if M0int/M0 > quantile:
-                    tau = xt
-                    break # the inside FOR loop
-            
-            break # the outside FOR loom
-            
+# Much faster quantile calculation 
+def quantile_calc(btc_1d, timearray, quantile):
+    # calculate cumulative amount of solute passing by location
+    M0i = integrate.cumtrapz(btc_1d, timearray)
+    # normalize by total to get CDF
+    quant = M0i/M0i[-1]
+    # calculate midtimes
+    mid_time = (timearray[1:] + timearray[:-1]) / 2.0
+    
+    # now linearly interpolate to find quantile
+    gind = np.argmax(quant > quantile)
+    m = (quant[gind] - quant[gind-1])/(mid_time[gind] - mid_time[gind-1])
+    b = quant[gind-1] - m*mid_time[gind-1]
+    
+    tau = (quantile-b)/m
     return tau
             
 # Function to calculate the quantile arrival time map
@@ -60,10 +45,10 @@ def exp_arrival_map_function(conc, timestep, grid_size, quantile, t_increment):
     oned = np.nansum(np.nansum(conc, 0), 0)
     
     # arrival time calculation in inlet slice
-    tau_in = quantile_calc(oned[0,:], timearray, quantile, t_increment/10)
+    tau_in = quantile_calc(oned[0,:], timearray, quantile)
     
     # arrival time calculation in outlet slice
-    tau_out = quantile_calc(oned[-1,:], timearray, quantile, t_increment/10)
+    tau_out = quantile_calc(oned[-1,:], timearray, quantile)
 
     # core length
     core_length = grid_size[2]*conc_size[2]
@@ -83,7 +68,7 @@ def exp_arrival_map_function(conc, timestep, grid_size, quantile, t_increment):
                     # check to make sure tracer is in grid cell
                     if cell_btc.sum() > 0:
                         # call function to find quantile of interest
-                        at_array[xc, yc, zc] = quantile_calc(cell_btc, timearray, quantile, t_increment)
+                        at_array[xc, yc, zc] = quantile_calc(cell_btc, timearray, quantile)
 
     v = (core_length-grid_size[2])/(tau_out - tau_in)
     print('advection velocity: ' + str(v))
@@ -153,7 +138,7 @@ def plot_2d(map_data, dx, dy, colorbar_label, cmap):
     plt.xlim((0, dx*c)) 
     plt.ylim((0, dy*r)) 
     # Label x-axis
-    plt.gca().invert_yaxis()
+    # plt.gca().invert_yaxis()
     
 def axial_linear_interp_3D(data_3d, dx, dy, dz, cnnslice):
     xd, yd, zd = np.shape(data_3d)

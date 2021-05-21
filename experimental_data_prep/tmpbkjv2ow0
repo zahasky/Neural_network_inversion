@@ -37,11 +37,6 @@ def load_arrival_data(arrival_data_filename):
     
 all_arrival_data = np.array([load_arrival_data('Bentheimer_2ml_2_3mm_at_norm'), \
                               load_arrival_data('Bentheimer_4ml_2_3mm_at_norm')])
-    # 
-# all_arrival_data = np.array([load_arrival_data('Ketton_2ml_2_3mm_at_norm'), \
-#                               load_arrival_data('Ketton_3ml_2_3mm_at_norm'), \
-#                               load_arrival_data('Ketton_4ml_1_2_3mm_at_norm'), \
-#                               load_arrival_data('Ketton_4ml_2_2_3mm_at_norm')])
     
 # all_arrival_data = np.array([load_arrival_data('Berea_C1_1ml_2_3mm_at_norm'), \
 #                               load_arrival_data('Berea_C1_2ml_2_3mmat_norm'), \
@@ -71,7 +66,7 @@ D = D[~np.isnan(D)]
 # calculate histogram
 histd, bin_edgesd = np.histogram(D, 50)
 # generate synthetic noise
-s = np.random.normal(0, np.std(D), len(D)+30000)
+s = np.random.normal(0, np.std(D), len(D)+25000)
 histn, bin_edgesn = np.histogram(s, 50)
 
 # plot histogram
@@ -79,11 +74,11 @@ fs = 14 # fontsize
 fig = plt.figure(figsize=(5, 4), dpi=200)
 ax = fig.gca()
 ax.plot(bin_edgesd[2:], histd[1:], 'k')
-# ax.plot(bin_edgesn[2:], histn[1:], 'r')
+ax.plot(bin_edgesn[2:], histn[1:], 'r')
 ax.set_title('Histogram of arrival time noise', fontsize=fs+2)
-ax.set_ylabel('Counts (2 repeated images)', fontsize=fs)
+ax.set_ylabel('Counts (5 repeated images)', fontsize=fs)
 ax.set_xlabel('Difference from voxel mean [-]', fontsize=fs)
-ax.set_xlim((-0.03, 0.03))
+ax.set_xlim((-0.06, 0.06))
 # ax.xaxis.set_minor_locator(AutoMinorLocator(), direction="in")
 # ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.tick_params(direction="in", bottom=True, top=True, left=True, right=True, labelsize=fs-2)

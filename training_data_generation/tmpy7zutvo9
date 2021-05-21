@@ -56,7 +56,7 @@ core_mask = np.loadtxt('core_mask.csv', delimiter=',')
 generate_fields = True
 
 # number of training datasets desired
-ntraining_data = 26000
+ntraining_data = 5
 # number of extra datasets to generate in case of sim or at calc failure
 extra_sets = 100
 
@@ -102,7 +102,7 @@ start_td = time.time() # start a timer
 # value of back up realizations to draw from
 replacement_counter = ntraining_data + 1
 
-td = 1
+td = 2
 while td < ntraining_data:
     
     print('TRAINING DATASET: ' + str(td))
@@ -116,9 +116,6 @@ while td < ntraining_data:
         srf = gs.SRF(model, seed=20170519)
         # permeability field in millidarcy
         field = 10**(srf.structured([np.arange(nlay), np.arange(nrow), np.arange(ncol)]) + p[1])
-        # check for negative values
-        field[field<0] = 1
-        print('GS model mean perm: '+ str(10**p[1]) + ' mD')
         # convert from mD to km^2
         field_km2 = field*(9.869233E-13/1000)
         # set permeability values outside of core to zero with core mask
@@ -241,16 +238,15 @@ plot_2d(plot_km2, grid_size[1], grid_size[2], 'Permeability', cmap='Greys')
 # plt.clim(-clim_pv, clim_pv)
 
 # First figure with concentration data
-pv = (np.array(timearray)-2)*(2/(3.1415*(2.5**2)*10*0.25))
 fig1 = plt.figure(figsize=(10, 15))
 ax0 = fig1.add_subplot(3, 1, 1, aspect='equal')
-imp = plt.pcolor(x, y, conc[12,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, conc[18,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,0.4) 
 cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax0.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f PV' %pv[12], fontsize=fs+2, **hfont)
+plt.title('Time: %1.1f min' %timearray[18], fontsize=fs+2, **hfont)
 
 ax1 = fig1.add_subplot(3, 1, 2, aspect='equal')
 imp = plt.pcolor(x, y, conc[20,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
@@ -259,19 +255,17 @@ plt.clim(0,0.4)
 cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax1.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f PV' %pv[20], fontsize=fs+2, **hfont)
+plt.title('Time: %1.1f min' %timearray[20], fontsize=fs+2, **hfont)
 
 ax2 = fig1.add_subplot(3, 1, 3, aspect='equal')
-imp = plt.pcolor(x, y, conc[45,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
+imp = plt.pcolor(x, y, conc[-1,ilayer,:,:], cmap='OrRd', edgecolors='k', linewidths=0.2)
 cbar = plt.colorbar()
 plt.clim(0,0.4) 
 cbar.set_label('Solute concentration', fontsize=fs, **hfont)
 cbar.ax.tick_params(labelsize= (fs-2)) 
 ax2.tick_params(axis='both', which='major', labelsize=fs)
-plt.title('Time: %1.1f PV' %pv[45], fontsize=fs+2, **hfont)
+plt.title('Time: %1.1f min' %timearray[-1], fontsize=fs+2, **hfont)
 plt.ylabel('Distance [cm]', fontsize=fs, **hfont)
-
-
 
 # Second figure with head and breakthrough time difference maps
 fig2 = plt.figure(figsize=(10, 15))
