@@ -53,7 +53,7 @@ core_mask = np.loadtxt('core_mask.csv', delimiter=',')
 # =============================================================================
 # PARAMETER SPACE DEFINITION
 # =============================================================================
-generate_fields = True
+generate_fields = False
 
 # number of training datasets desired
 ntraining_data = 26001
@@ -104,7 +104,7 @@ start_td = time.time() # start a timer
 # value of back up realizations to draw from
 replacement_counter = ntraining_data + 1
 
-td = 26000
+td = 1
 while td < ntraining_data:
     
     print('TRAINING DATASET: ' + str(td))

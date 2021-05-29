@@ -53,10 +53,11 @@ core_mask = np.loadtxt('core_mask.csv', delimiter=',')
 # =============================================================================
 # PARAMETER SPACE DEFINITION
 # =============================================================================
-generate_fields = True
+generate_fields = False
 
 # number of training datasets desired
 ntraining_data = 26001
+ntraining_data = 6
 # number of extra datasets to generate in case of sim or at calc failure
 extra_sets = 100
 
@@ -104,7 +105,7 @@ start_td = time.time() # start a timer
 # value of back up realizations to draw from
 replacement_counter = ntraining_data + 1
 
-td = 26000
+td = 5
 while td < ntraining_data:
     
     print('TRAINING DATASET: ' + str(td))
@@ -112,7 +113,7 @@ while td < ntraining_data:
     # ========================================================================
     # PERMEABILITY FIELD GENERATION
     # ========================================================================
-    p = Ps[td-1]
+    p = Ps[td]
     if generate_fields == True:
         model = gs.Exponential(dim=3, var=10**p[0], len_scale=[p[2], p[3], p[4]], angles=[p[5], p[6], p[7]])
         srf = gs.SRF(model, seed=20170519)
@@ -179,7 +180,7 @@ while td < ntraining_data:
     # 20,000 data initially generated
     if isinstance(at_diff_norm, int):
         # replace parameters
-        Ps[td-1] = Ps[replacement_counter]
+        Ps[td] = Ps[replacement_counter]
         # resave parameter space information  
         np.savetxt('parameter_space_26k.csv', Ps , delimiter=',', fmt='%.3e')
         print('Training dataset: ' + str(td) + ', replaced with realization: ' + str(replacement_counter))

@@ -79,11 +79,11 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, prsity_field, grid_size,
     dummy_ch_por = core_mask[:,:, np.newaxis]*0.15
     
     # Additional dummy inlet to replicate imperfect boundary
-    dummy_slice_in =raw_hk[:,:,0]*core_mask
-    dummy_slice_in = dummy_slice_in.reshape(hk_size[0], hk_size[1], 1)
     # concantenate dummy slice on hydraulic conductivity array
     ndummy_in = int(ndummy_in)
     if ndummy_in > 0:
+        dummy_slice_in =raw_hk[:,:,0]*core_mask
+        dummy_slice_in = dummy_slice_in.reshape(hk_size[0], hk_size[1], 1)
         dummy_block = np.repeat(dummy_slice_in, ndummy_in, axis=2)
         hk = np.concatenate((dummy_ch, dummy_block, raw_hk, dummy_ch), axis=2)
         

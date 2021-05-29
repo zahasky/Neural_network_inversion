@@ -79,11 +79,10 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, prsity_field, grid_size,
     dummy_ch_por = core_mask[:,:, np.newaxis]*0.15
     
     # Additional dummy inlet to replicate imperfect boundary
-    dummy_slice_in =raw_hk[:,:,0]*core_mask
-    dummy_slice_in = dummy_slice_in.reshape(hk_size[0], hk_size[1], 1)
     # concantenate dummy slice on hydraulic conductivity array
-    ndummy_in = int(ndummy_in)
     if ndummy_in > 0:
+        dummy_slice_in =raw_hk[:,:,0]*core_mask
+        dummy_slice_in = dummy_slice_in.reshape(hk_size[0], hk_size[1], 1)
         dummy_block = np.repeat(dummy_slice_in, ndummy_in, axis=2)
         hk = np.concatenate((dummy_ch, dummy_block, raw_hk, dummy_ch), axis=2)
         
@@ -179,7 +178,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, prsity_field, grid_size,
     # Stress period well data for MODFLOW. Each well is defined through defintition
     # of layer (int), row (int), column (int), flux (float). The first number corresponds to the stress period
     # Example for 1 stress period: spd_mf = {0:[[0, 0, 1, q],[0, 5, 1, q]]}
-    well_info = np.zeros((int(np.sum(core_mask)), 4), dtype=float)
+    well_info = np.zeros((int(np.sum(core_mask)), 4), dtype=np.float)
     # Nested loop to define every inlet face grid cell as a well
     index_n = 0
     for layer in range(0, nlay):
@@ -247,7 +246,7 @@ def mt3d_pulse_injection_sim(dirname, model_ws, raw_hk, prsity_field, grid_size,
     # This is used as input for the source and sink mixing package
     # Itype is an integer indicating the type of point source, 2=well, 3=drain, -1=constant concentration
     itype = 2
-    cwell_info = np.zeros((int(np.sum(core_mask)), 5), dtype=float)
+    cwell_info = np.zeros((int(np.sum(core_mask)), 5), dtype=np.float)
     # cwell_info = np.zeros((nrow*nlay, 5), dtype=np.float)
     # Nested loop to define every inlet face grid cell as a well
     index_n = 0
