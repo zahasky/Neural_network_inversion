@@ -21,8 +21,6 @@ from temporal_moment_testing import mean_exp_bt_map
 # Berea
 data_filename = 'Berea_porosity_uncoarsened_nan'
 
-
-
 # =============================================================================
 # LOAD SELECTED EXAMPLE DATA 
 # =============================================================================
@@ -62,31 +60,16 @@ data[data>0.5]=0.5
 
 por_tensor = torch.from_numpy(data.copy())
 por_tensor = por_tensor.reshape(1, nrow, ncol, nslice)
-plot_2d(por_tensor[0, :,:,0], dx, dy, 'porosity', cmap='viridis')
 
 # pytorch downsample
+# downsample along axis of core
 por_tensor_coarse = interpolate(por_tensor, size=[ncol,40], mode='bilinear')
+# permute and downsample plane perpendicular to long axis of core
 por_tensor_coarse = por_tensor_coarse.permute(0, 3, 1, 2)
 por_tensor_coarse = interpolate(por_tensor_coarse, size=([20, 20]), mode='bilinear')
-# por_tensor_coarse = interpolate(por_tensor_coarse, size=20, mode='linear')
-
+# permute back to original orientation 
 por_tensor_coarse = por_tensor_coarse.permute(0, 2, 3, 1)
+
+# plot comparison of before and after
+plot_2d(por_tensor[0, :,:,0], dx, dy, 'porosity', cmap='viridis')
 plot_2d(por_tensor_coarse[0,:,:,0], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
-
-## 3D linear interpolation, this is done after arrival time calculation
-# at_interp_3d, dz_interp = axial_linear_interp_3D(at_diff_norm, dx, dy, dz, 40)
-# plot_2d(at_interp_3d[:,11,:], dz_interp, dy, 'interp arrival time', cmap='bwr')
-
-# save normalized arrival time data
-# save_filename_atdn = 'pet_arrival_time_data'  + '\\' + data_filename[:-12] + '_at.csv'
-# save_data = np.append(at_interp_3d.flatten('C'), [km2])
-# np.savetxt(save_filename_atdn, save_data, delimiter=',')
-
-
-
-
-
-
-
-
-
