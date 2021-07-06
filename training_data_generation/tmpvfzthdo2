@@ -40,34 +40,30 @@ exe_name_mt = 'D:\\Dropbox\\Research\\Simulation\\modflow\\executables\\mt3dms'
 # directory to save data
 # directory_name = 'examples'
 # workdir = os.path.join('.', '3D_fields', directory_name)
-directory_name = 'models'
-workdir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\\June_21_new_mask', directory_name)
-# directory for homogeneous models
-homogeneous_arrival_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\June_21_new_mask\\homogeneous_porosity_new_mask')
-# directory for heterogeneous models
-heterogeneous_arrival_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\June_21_new_mask\\heterogeneous_porosity_new_mask')
+directory_name = 'arrival_time_maps'
+workdir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\homogeneous_porosity_new_mask', directory_name)
 
 # Set path to perm maps
 # perm_field_dir = os.path.join('.')
 # perm_field_dir = os.path.join('.', '3D_fields', directory_name)
-# perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\syn_core_perm_maps')
-new_perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\June_21_new_mask\\syn_core_perm_maps_new_mask')
+perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\syn_core_perm_maps')
+new_perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python26k\\syn_core_perm_maps_new_mask')
 
 # =============================================================================
 # PARAMETER SPACE DEFINITION
 # =============================================================================
 # Generation options
 # generate new sample space and permeability fields (True or False)
-generate_sample_space = False
-generate_fields = True
-parameter_space_csv_name = 'parameter_space_26k_6_21.csv'
+generate_fields = False
+# Create heterogeneous porosity fields (True or False)
+heterogeneous_porosity = False
 
 # number of training datasets desired
 ntraining_data = 26001
 # number of extra datasets to generate in case of sim or at calc failure
 extra_sets = 100
 
-if generate_sample_space == True:
+if generate_fields == True:
     lhs = Lhs(lhs_type="classic", criterion=None)
     
     # log_var, log_mD(10 mD to 20 D), x len, y len, z len, rotation x, rotation y, rotation z, number of dummy slices, por-per a, por-perm b
@@ -77,9 +73,9 @@ if generate_sample_space == True:
                       (0.0, 1.57), (0.0, 1.57), (0.0, 1.57), (0,2), (0.25, 1.0), (5, 20)], ntraining_data + extra_sets)
 
     # example of how to efficiently save data to text file    
-    np.savetxt(parameter_space_csv_name, Ps , delimiter=',', fmt='%.3e')
+    np.savetxt('parameter_space_26k_with_porosity.csv', Ps , delimiter=',', fmt='%.3e')
 else:
-    Ps = np.loadtxt(parameter_space_csv_name, delimiter=',')
+    Ps = np.loadtxt('parameter_space_26k_with_porosity.csv', delimiter=',')
     
 # =============================================================================
 # VARIABLES THAT DON'T CHANGE
@@ -120,8 +116,8 @@ start_td = time.time() # start a timer
 # value of back up realizations to draw from
 replacement_counter = ntraining_data + 1
 
-td = 19589
-while td < ntraining_data:
+td = 1
+while td < 3:
     
     print('TRAINING DATASET: ' + str(td))
        
@@ -145,22 +141,22 @@ while td < ntraining_data:
         
         # Save data in small format
         save_data = np.append(field_km2.flatten('C'), [nlay, nrow, ncol])
-        np.savetxt(new_perm_field_dir + '\\corenm_k_3d_m2_' + str(td)+'.csv', save_data , delimiter=',', fmt='%.3e')
+        np.savetxt(perm_field_dir + '\\core_k_3d_m2_' + str(td)+'.csv', save_data , delimiter=',', fmt='%.3e')
     else:
         # Import permeability map
         field_km2 = np.loadtxt(perm_field_dir + '\\core_k_3d_m2_' + str(td) +'.csv', delimiter=',')
         # crop off last three values that give model dimensions
         field_km2 = field_km2[:-3]
         field_km2 = field_km2.reshape(nlay, nrow, ncol)
-        # plot_2d(field_km2[:,:,1], grid_size[0], grid_size[1], 'perm', cmap='gray')
+        plot_2d(field_km2[:,:,1], grid_size[0], grid_size[1], 'perm', cmap='gray')
         
-        # # set permeability values outside of core to zero with core mask
-        # for col in range(ncol):
-        #     field_km2[:,:,col] = np.multiply(field_km2[:,:,col], core_mask)
-        # # plot_2d(field_km2[:,:,1], grid_size[0], grid_size[1], 'perm', cmap='gray')
+        # set permeability values outside of core to zero with core mask
+        for col in range(ncol):
+            field_km2[:,:,col] = np.multiply(field_km2[:,:,col], core_mask)
+        plot_2d(field_km2[:,:,1], grid_size[0], grid_size[1], 'perm', cmap='gray')
         
-        # save_data = np.append(field_km2.flatten('C'), [nlay, nrow, ncol])
-        # np.savetxt(new_perm_field_dir + '\\corenm_k_3d_m2_' + str(td)+'.csv', save_data , delimiter=',', fmt='%.3e')
+        save_data = np.append(field_km2.flatten('C'), [nlay, nrow, ncol])
+        np.savetxt(new_perm_field_dir + '\\corenm_k_3d_m2_' + str(td)+'.csv', save_data , delimiter=',', fmt='%.3e')
         
         
     
@@ -169,18 +165,19 @@ while td < ntraining_data:
     # Convert permeabiltiy (in m^2) to hydraulic conductivity in cm/min
     raw_hk = field_km2*(1000*9.81*100*60/8.9E-4)
     
-    # Calculatie heterogeneous porosity field
-    prsity_field = ((np.log(field_km2/(9.869233E-13/1000))/p[9]) + p[10])/100
-    # replace infinity values with zeros
-    prsity_field[field_km2<1e-25]=0
-    # set upper limit of 80 percent porosity
-    prsity_field[prsity_field >0.8]=0.8
-
-    hom_prsity_field = copy.deepcopy(field_km2)
-    # replace with homogeneous values
-    hom_prsity_field[field_km2<1e-25]=0
-    hom_prsity_field[field_km2>1e-25]=0.20
-    
+    if heterogeneous_porosity == True:
+        # Calculatie heterogeneous porosity field
+        prsity_field = ((np.log(field_km2/(9.869233E-13/1000))/p[9]) + p[10])/100
+        # replace infinity values with zeros
+        prsity_field[field_km2<1e-25]=0
+        # set upper limit of 80 percent porosity
+        prsity_field[prsity_field >0.8]=0.8
+    else:
+        prsity_field = copy.deepcopy(field_km2)
+        # replace with homogeneous values
+        prsity_field[field_km2<1e-25]=0
+        prsity_field[field_km2>1e-25]=0.20
+        
     
     # Describe grid for results    
     Lx = (ncol) * grid_size[2]   # length of model in selected units 
@@ -192,7 +189,7 @@ while td < ntraining_data:
     model_ws = os.path.join(workdir, model_dirname)
     
     mf, mt, conc, timearray, km2_mean = mt3d_pulse_injection_sim(model_dirname, 
-                model_ws, raw_hk, hom_prsity_field, grid_size, ndummy_in,  perlen_mt, nprs, 
+                model_ws, raw_hk, prsity_field, grid_size, ndummy_in,  perlen_mt, nprs, 
                 mixelm, exe_name_mf, exe_name_mt)
     # print('Core average perm: '+ str(km2_mean) + ' m^2')
     
@@ -213,7 +210,7 @@ while td < ntraining_data:
         # replace parameters
         Ps[td-1] = Ps[replacement_counter]
         # resave parameter space information  
-        np.savetxt(parameter_space_csv_name, Ps , delimiter=',', fmt='%.3e')
+        np.savetxt('parameter_space_26k.csv', Ps , delimiter=',', fmt='%.3e')
         print('Training dataset: ' + str(td) + ', replaced with realization: ' + str(replacement_counter))
         # update replacement counter
         replacement_counter += 1
@@ -223,48 +220,12 @@ while td < ntraining_data:
     # SAVE DATA 
     # =============================================================================
     # save normalized arrival time difference data
-    save_filename_btdn = homogeneous_arrival_dir + '\\' + 'arrival_norm_diff_' + model_dirname + '_'  + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
+    save_filename_btdn = workdir + '\\' + 'arrival_norm_diff_' + model_dirname + '_'  + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
     save_data = np.append(at_diff_norm.flatten('C'), [km2_mean])
     np.savetxt(save_filename_btdn, save_data, delimiter=',', fmt='%.3e')
     
     # save unnormalized breakthrough data
-    save_filename_btd = homogeneous_arrival_dir + '\\' + 'arrival_norm_' + model_dirname + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
-    save_data = np.append(at_array_norm.flatten('C'), [km2_mean])
-    np.savetxt(save_filename_btd, save_data, delimiter=',', fmt='%.3e')
-    
-    
-    #### MODEL WITH HETEROGENEOUS POROSITY FIELD
-    mf, mt, conc, timearray, km2_mean = mt3d_pulse_injection_sim(model_dirname, 
-                model_ws, raw_hk, prsity_field, grid_size, ndummy_in,  perlen_mt, nprs, 
-                mixelm, exe_name_mf, exe_name_mt)
-    
-    # calculate quantile arrival time map from MT3D simulation results
-    at_array, at_array_norm, at_diff_norm = flopy_arrival_map_function(conc, np.array(timearray), grid_size, 0.5)
-    
-    # In some cases the models may fail to run or there are issues with calculating arrival times
-    # When this happens the realization is replaced with a random realization 
-    # from a second sampling. This occurs less than 50 times in the entire 
-    # 20,000 data initially generated
-    if isinstance(at_diff_norm, int):
-        # replace parameters
-        Ps[td-1] = Ps[replacement_counter]
-        # resave parameter space information  
-        np.savetxt(parameter_space_csv_name, Ps , delimiter=',', fmt='%.3e')
-        print('Training dataset: ' + str(td) + ', replaced with realization: ' + str(replacement_counter))
-        # update replacement counter
-        replacement_counter += 1
-        continue
-        
-    # =============================================================================
-    # SAVE DATA 
-    # =============================================================================
-    # save normalized arrival time difference data
-    save_filename_btdn = heterogeneous_arrival_dir + '\\' + 'arrival_norm_diff_' + model_dirname + '_'  + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
-    save_data = np.append(at_diff_norm.flatten('C'), [km2_mean])
-    np.savetxt(save_filename_btdn, save_data, delimiter=',', fmt='%.3e')
-    
-    # save unnormalized breakthrough data
-    save_filename_btd = heterogeneous_arrival_dir + '\\' + 'arrival_norm_' + model_dirname + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
+    save_filename_btd = workdir + '\\' + 'arrival_norm_' + model_dirname + '_' + str(nlay) + '_' + str(nrow) + '_' + str(ncol) +'.csv'
     save_data = np.append(at_array_norm.flatten('C'), [km2_mean])
     np.savetxt(save_filename_btd, save_data, delimiter=',', fmt='%.3e')
     

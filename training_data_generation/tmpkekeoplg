@@ -58,7 +58,6 @@ new_perm_field_dir = os.path.join('D:\\Training_data_generation_3D\\tdata_python
 # =============================================================================
 # Generation options
 # generate new sample space and permeability fields (True or False)
-generate_sample_space = False
 generate_fields = True
 parameter_space_csv_name = 'parameter_space_26k_6_21.csv'
 
@@ -67,7 +66,7 @@ ntraining_data = 26001
 # number of extra datasets to generate in case of sim or at calc failure
 extra_sets = 100
 
-if generate_sample_space == True:
+if generate_fields == True:
     lhs = Lhs(lhs_type="classic", criterion=None)
     
     # log_var, log_mD(10 mD to 20 D), x len, y len, z len, rotation x, rotation y, rotation z, number of dummy slices, por-per a, por-perm b
@@ -120,7 +119,7 @@ start_td = time.time() # start a timer
 # value of back up realizations to draw from
 replacement_counter = ntraining_data + 1
 
-td = 19589
+td = 1
 while td < ntraining_data:
     
     print('TRAINING DATASET: ' + str(td))
