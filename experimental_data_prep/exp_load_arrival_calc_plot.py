@@ -16,9 +16,9 @@ from temporal_moment_testing import mean_exp_bt_map
 
 
 # Navajo
-# data_filename = 'Navajo_2ml_1_2_3mm_cropped_nan'
-# phi = 19.8/((3.1415*2.54**2)*10)
-# km2 = 28.5*9.869233E-13/1000
+data_filename = 'Navajo_2ml_1_2_3mm_cropped_nan'
+phi = 19.8/((3.1415*2.54**2)*10)
+km2 = 28.5*9.869233E-13/1000
 # ketton
 # data_filename = 'Ketton_2ml_2_3mm_cropped_nan'
 # phi = 48.7/((3.1415*2.54**2)*10)
@@ -28,9 +28,9 @@ from temporal_moment_testing import mean_exp_bt_map
 # phi = 52.4/((3.1415*2.54**2)*10.3)
 # km2 = 1722*9.869233E-13/1000
 # Berea
-data_filename = 'Berea_C1_2ml_2_3mm_cropped_nan'
-phi = 42.0/((3.1415*2.54**2)*10)
-km2 = 23.2*9.869233E-13/1000
+# data_filename = 'Berea_C1_2ml_2_3mm_cropped_nan'
+# phi = 42.0/((3.1415*2.54**2)*10)
+# km2 = 23.2*9.869233E-13/1000
 # Edwards
 # data_filename = 'Edwards_2ml_2_3mm_cropped_nan'
 # phi = 85.6/((3.1415*2.54**2)*10.3)

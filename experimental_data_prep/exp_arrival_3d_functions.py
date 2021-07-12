@@ -124,7 +124,7 @@ def plot_2d(map_data, dx, dy, colorbar_label, cmap):
     # Use 'pcolor' function to plot 2d map of concentration
     # Note that we are flipping map_data and the yaxis to so that y increases downward
     plt.figure(figsize=(12, 4), dpi=200)
-    plt.pcolormesh(X, Y, map_data, cmap=cmap, shading = 'nearest', edgecolor ='k', linewidth = 0.01)
+    plt.pcolormesh(X, Y, map_data, cmap=cmap, shading = 'auto', edgecolor ='k', linewidth = 0.01)
     plt.gca().set_aspect('equal')  
     # add a colorbar
     cbar = plt.colorbar() 

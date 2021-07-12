@@ -13,13 +13,16 @@ from torch.nn.functional import interpolate
 import torch
 # from scipy.interpolate import RegularGridInterpolator
 
-from exp_arrival_3d_functions import plot_2d, exp_arrival_map_function, axial_linear_interp_3D, quantile_calc
-from temporal_moment_testing import mean_exp_bt_map
+from exp_arrival_3d_functions import *
+from temporal_moment_testing import *
 
 
 
 # Berea
-data_filename = 'Berea_porosity_uncoarsened_nan'
+# data_filename = 'Berea_porosity_uncoarsened_nan'
+# Navajo
+# data_filename = 'Navajo_porosity_coarsened'
+data_filename = 'Navajo_porosity_uncoarsened'
 
 # =============================================================================
 # LOAD SELECTED EXAMPLE DATA 
@@ -46,7 +49,7 @@ data = all_data[0:-6]
 # reshape from imported column vector to 4D matrix
 data = data.reshape(nrow, ncol, nslice)
 # Flip data to orient top of cores to top of plot
-data = np.flip(data, 0)
+# data = np.flip(data, 0)
 
 
 # Plot at a few timesteps to make sure import is correct
@@ -83,5 +86,13 @@ mask = np.concatenate((mask_top, np.flipud(mask_top)))
 
 # plot comparison of before and after
 plot_2d(mask, dx, dy, 'mask', cmap='gray')
-plot_2d(por_tensor[0, :,:,0], dx, dy, 'porosity', cmap='viridis')
-plot_2d(por_tensor_coarse[0,:,:,0], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
+plot_2d(por_tensor[0, :,:,22], dx, dy, 'porosity', cmap='viridis')
+plt.clim(0.05, 0.2)
+plot_2d(por_tensor_coarse[0,:,:,22], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
+plt.clim(0.05, 0.2)
+
+for col in range(40):
+    por_tensor_coarse[0,:,:,col] = np.multiply(por_tensor_coarse[0,:,:,col], mask)
+    
+plot_2d(por_tensor_coarse[0,:,:,22], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
+plt.clim(0.05, 0.2)

@@ -14,14 +14,27 @@ close all
 % timestep_length = 60;
 % injected pulse volume [mL]
 % inj_pv = 4;
+
 % Berea porosity
-addpath('B:\Experimental_data\Stanford_data\PET_CT\Berea_sandston_C1\january_16_CT_imbibe\BS_C1_SImb')
-load('dry_average.mat')
-dry = AVG;
-load('full_sat_average.mat')
-wet = AVG;
-vox_size = [0.03125 0.03125 0.125];
-filename = 'berea_porosity_uncoarsened';
+% addpath('B:\Experimental_data\Stanford_data\PET_CT\Berea_sandston_C1\january_16_CT_imbibe\BS_C1_SImb')
+% load('dry_average.mat')
+% dry = AVG;
+% load('full_sat_average.mat')
+% wet = AVG;
+% vox_size = [0.03125 0.03125 0.125];
+% filename = 'berea_porosity_uncoarsened';
+% % Calculate porosity
+% PET_4D_coarse = (wet-dry)./1000;
+
+% Navajo porosity
+addpath('Z:\Experimental_data\Stanford_data\PET_CT\Navajo_ss_cores_strathclyde\BS21\CT_data\April_SI_exp\BS21_imb')
+load('7_coarse.mat')
+dry = CI_coarse;
+addpath('Z:\Experimental_data\Stanford_data\PET_CT\Navajo_ss_cores_strathclyde\BS21\CT_data\April_SI_exp\bs21_fullsat2')
+load('full_sat_coarse_average.mat')
+wet = CI_coarse;
+vox_size = [0.25 0.25 0.25];
+filename = 'Navajo_porosity_coarsened';
 % Calculate porosity
 PET_4D_coarse = (wet-dry)./1000;
 
@@ -47,13 +60,13 @@ PET_size = size(PET_4D_coarse);
 
 %% Visual check
 figure
-imagesc(squeeze(PET_4D_coarse(10,:,:)))
+imagesc(squeeze(PET_4D_coarse(:,10,:)))
 axis image
 colorbar
 set(gca,'Ydir','normal')
 
 figure
-imagesc(squeeze(PET_4D_coarse(:,:,80)))
+imagesc(squeeze(PET_4D_coarse(:,:,39)))
 axis image
 % colormap('gray')
 colorbar
