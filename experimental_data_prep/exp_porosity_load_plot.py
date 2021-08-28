@@ -88,11 +88,14 @@ mask = np.concatenate((mask_top, np.flipud(mask_top)))
 plot_2d(mask, dx, dy, 'mask', cmap='gray')
 plot_2d(por_tensor[0, :,:,22], dx, dy, 'porosity', cmap='viridis')
 plt.clim(0.05, 0.2)
-plot_2d(por_tensor_coarse[0,:,:,22], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
+plot_2d(por_tensor_coarse[0,:,:,11], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
 plt.clim(0.05, 0.2)
 
 for col in range(40):
     por_tensor_coarse[0,:,:,col] = np.multiply(por_tensor_coarse[0,:,:,col], mask)
     
-plot_2d(por_tensor_coarse[0,:,:,22], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
+plot_2d(por_tensor_coarse[0,:,:,11], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
+plt.clim(0.05, 0.2)
+
+plot_2d(por_tensor_coarse[0,:,10,:], dx*(nrow/20), dy*(ncol/20), 'porosity', cmap='viridis')
 plt.clim(0.05, 0.2)

@@ -12,15 +12,50 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # dry scans
-path2dry = 'Z:\\Experimental_data\\Stanford_data\\PET_CT\\Navajo_ss_cores_strathclyde\\BS21\\CT_data\\June_SI_exp\\BH21-si-dry'
-dry_list = [7, 8 , 9]
-# wet scans
-path2wet = 'Z:\\Experimental_data\\Stanford_data\\PET_CT\\Navajo_ss_cores_strathclyde\\BS21\\CT_data\\June_SI_exp\\Bh21_wet'
-wet_list = [13, 14, 15]
-filename_root = '_156_156_88_16bit.raw'
+# Navajo
+# path2dry = 'Z:\\Experimental_data\\Stanford_data\\PET_CT\\Navajo_ss_cores_strathclyde\\BS21\\CT_data\\June_SI_exp\\BH21-si-dry'
+# filename_root = '_156_156_88_16bit.raw'
+# dry_list = [7, 8 , 9]
+# img_dim = [156, 156, 88]
+# vox_size = [0.031250, 0.031250, 0.125]
+# coarse_vox_size = [0.031250*4, 0.031250*4, 0.125]
+# coarse_factor = 4
+# # end crop: Dry[:,:,4:-5]
+# core_max = 1700
 
-img_dim = [156, 156, 88]
-vox_size = [0.031250*4, 0.031250*4, 0.125]
+# Berea
+# path2dry = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data\\raw_ct'
+# filename_root = '_berea_CT_scan_152_152_96_16b.raw'
+# dry_list = [10, 13, 16]
+# img_dim = [152, 152, 96]
+# vox_size = [0.031250, 0.031250, 0.125]
+# coarse_factor = 4
+# end crop: Dry[:,:,8:-8]
+
+
+# Edwards
+# path2dry = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data\\raw_ct\\edwards'
+# filename_root = 'Edwards_dry_424_424_115_16b.raw'
+# dry_list = [1]
+# img_dim = [424, 424, 115]
+# vox_size = [0.0117, 0.0117, 0.1]
+# coarse_vox_size = [0.0117*8, 0.0117*8, 0.1]
+# #end crop: Dry[:,:,6:-8]
+# coarse_factor = 8
+# core_max = 1100
+# core_min =500
+
+# Indiana
+path2dry = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data\\raw_ct\\indiana'
+filename_root = 'Indiana_dry_392_392_120_16b.raw'
+dry_list = [1]
+img_dim = [392, 392, 120]
+vox_size = [0.012, 0.012, 0.1]
+coarse_vox_size = [0.012*8, 0.012*8, 0.1]
+#end crop: Dry[:,:,7:-12]
+coarse_factor = 8
+core_max = 2100
+core_min =500
 
 
 def plot_2d(map_data, dx, dy, colorbar_label, cmap, *args):
@@ -76,43 +111,34 @@ def coarsen_slices(array3d, coarseness):
 
 
 Dry = load_average_data(path2dry, dry_list, filename_root, img_dim)
+# crop ends
+Dry = Dry[:,:,7:-12]
 
-Wet = load_average_data(path2wet, wet_list, filename_root, img_dim)
+Dry_coarse = coarsen_slices(Dry, coarse_factor)
 
+# Try normalizing CT data to porosity range
+# core_min = Dry_coarse[10:28, 10:28, :].min()
+core_min = Dry_coarse[20:33,20:33, :].min()
 
 # plot_2d(data[:,77,:], vox_size[2], vox_size[0], 'HU', cmap='gray')
-# plot_2d(Dry[:,:,20], vox_size[0], vox_size[1], 'HU', cmap='gray')
-plot_2d(Dry[:,77,:], vox_size[2], vox_size[0], 'HU', cmap='gray')
-plt.clim(1000, 1600) 
-
-Dry_coarse = coarsen_slices(Dry[2:-2,2:-2,:], 4)
-plot_2d(Dry_coarse[:,:,22], vox_size[0], vox_size[1], '[-]', cmap='gray')
-plt.clim(1000, 1600) 
-
-plot_2d(Wet[:,77,:], vox_size[2], vox_size[0], 'HU', cmap='gray')
-plt.clim(1000, 1600) 
-
-Wet_coarse = coarsen_slices(Wet[2:-2,2:-2,:], 4)
-plot_2d(Wet_coarse[:,:,22], vox_size[0], vox_size[1], '[HU]', cmap='gray')
-plt.clim(1000, 1600) 
-
-Por = (Wet_coarse - Dry_coarse) /(1000)
-# crop porosity
-Por = Por[:,:,4:-5]
+plot_2d(Dry_coarse[:,25,:], coarse_vox_size[2], coarse_vox_size[0], 'HU', cmap='gray')
+plt.clim(core_min,core_max)
+plot_2d(Dry[:,25*8,:], vox_size[2], vox_size[0], 'HU', cmap='gray')
+plt.clim(core_min,core_max)
 
 
-plot_2d(Por[:,:,22], vox_size[0], vox_size[1], '[-]', cmap='viridis')
-plt.clim(0.05, 0.2)
 
-plot_2d(Por[:,22,:], vox_size[2], vox_size[1]*4, '[-]', cmap='viridis')
-plt.clim(0.1, 0.2)
+Dry_coarse[Dry_coarse>core_max] = core_max
+Dry_coarse[Dry_coarse<core_min] = core_min
+norm_ct = np.absolute(Dry_coarse - core_max)/(core_max - core_min)
+por_guess = (norm_ct*0.10) + 0.15
 
-plot_2d(Wet[:,:,22], vox_size[0], vox_size[1], '[-]', cmap='gray')
-plot_2d(Dry[:,:,22], vox_size[0], vox_size[1], '[-]', cmap='gray')
-plot_2d(Por[:,:,22], vox_size[0], vox_size[1], '[-]', cmap='viridis')
+por_guess = np.flip(por_guess, 0)
+plot_2d(por_guess[:,25,:], vox_size[2], coarse_vox_size[0], '[-]', cmap='viridis')
+# plt.clim(0.15, 0.25)
 
-data_size = Por.shape
-save_filename = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data'  + '\\' 'Navajo_porosity_coarsened.csv'
-save_data = np.append(Por.flatten('C'), [data_size, vox_size])
+data_size = por_guess.shape
+
+save_filename = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data'  + '\\' 'Indiana_scaled_CT_coarsened.csv'
+save_data = np.append(por_guess.flatten('C'), [data_size, coarse_vox_size])
 np.savetxt(save_filename, save_data, delimiter=',')
-
