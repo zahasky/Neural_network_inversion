@@ -85,7 +85,6 @@ if cuda:
     encoder.cuda()
     decoder.cuda()
     pixelwise_loss.cuda()
-    mse_loss.cuda()
     kl_loss.cuda()
 
 # Optimizer
