@@ -4,8 +4,6 @@ import torch.nn.functional as F
 import numpy as np
 import argparse
 
-from torch.autograd import Variable
-
 
 #-------------------------------------------------------------------------------------------------------------------------
 #References:
