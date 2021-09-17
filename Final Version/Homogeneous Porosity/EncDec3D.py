@@ -31,6 +31,7 @@ parser.add_argument('--num-res-blocks', type=int, default=1, help='Number of res
 
 args = parser.parse_args()
 
+
 class DenseBlock(nn.Module):
     def __init__(self, in_features, growth_rate, dropout_rate=args.dropout_rate, kernel_size=3, stride=1, padding=1, non_linearity=True):
         super(DenseBlock, self).__init__()
@@ -85,7 +86,6 @@ class ResiduleDenseNetwork(nn.Module):
     def forward(self, x):
         RDN = self.residule_dense_blocks(x).mul(self.res_scale)
         return torch.add(RDN,x)
-
 
 class Encoder(nn.Module):
     def __init__(self, inchannels=args.in_channels, outchannels=args.lat_channels, filters=args.num_filters, num_res_blocks=args.num_res_blocks):
