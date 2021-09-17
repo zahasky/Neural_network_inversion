@@ -11,7 +11,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import Dataset, DataLoader
-from EncDec3D import Encoder, Decoder
+from EncDec3Do import Encoder, Decoder
 from DataLoadero import InputDataset
 from Accuracy3D import SSIM, R2, RMSE
 
