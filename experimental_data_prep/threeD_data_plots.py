@@ -54,11 +54,12 @@ def half_core(data):
 
 
 # Import arrival time data
+arrival_data_filename = 'Berea_C1_2ml_2_3mm_at_norm' 
 # arrival_data_filename = 'Berea_C1_1ml_2_3mm_at_norm' 
 # arrival_data_filename = 'Indiana_2ml_2_3mm_at_norm' 
 # arrival_data_filename = 'Ketton_3ml_2_3mm_at_norm'
 # arrival_data_filename = 'Bentheimer_2ml_2_3mm_at_norm'
-arrival_data_filename = 'Bentheimer_2ml_2_3mm_at_norm_nodiff'
+# arrival_data_filename = 'Bentheimer_2ml_2_3mm_at_norm_nodiff'
 
 data_dir_arrival = os.path.join('.', 'pet_arrival_time_data')
 # Import data
@@ -73,12 +74,59 @@ dz = 0.2329 # voxel size in z direction (parallel to axis of core)
 dy = 0.2329 # voxel size in y direction
 dx = 0.2388 # voxel size in x direction
 
-# plot_2d(arrival_data[:,11,:], dz, dy, 'arrival time', cmap='bwr')
+###### Plot PET data
+# data_filename = 'Berea_C1_2ml_2_3mm_cropped_nan'
+# total_PV = 42
 
+# data_filename = 'Edwards_2ml_2_3mm_cropped_nan'
+# total_PV = 85.6
 
+# data_filename = 'Indiana_2ml_2_3mm_cropped_nan'
+# total_PV = 34.9
+
+# data_filename = 'Ketton_2ml_2_3mm_cropped_nan'
+# total_PV = 48.7
+
+# data_dir = os.path.join('.', 'pet_data')
+# # Import data
+# all_data = np.loadtxt(data_dir + '\\' + data_filename + '.csv', delimiter=',')
+
+# dz = all_data[-1] # voxel size in z direction (parallel to axis of core)
+# dy = all_data[-2] # voxel size in y direction
+# dx = all_data[-3] # voxel size in x direction
+# tracer_volume = all_data[-4] # tracer injected (ml)
+# q = all_data[-5] # flow rate (ml/min)
+# tstep = all_data[-6] # timstep length (sec)
+# ntime = int(all_data[-7])
+# nslice = int(all_data[-8])
+# print(nslice)
+# nrow = int(all_data[-10])
+# ncol = int(all_data[-9])
+
+# all_data = all_data[0:-10]
+
+# all_data = all_data.reshape(nrow, ncol, nslice, ntime)
+
+# all_data = all_data/np.nanmax(all_data)
+
+# timestep = [3, 6]
+# n=0
+
+# for i in timestep:
+#     print(i)
+
+    # data_frame = all_data[:,:,:, i]
+    
+    # data_frame[np.isnan(data_frame)]=0
+
+    # crop core
+    # arrival_data, ncol = half_core(data_frame)
+    
 # crop core
 arrival_data, ncol = half_core(arrival_data)
+
 # swap axes
+arrival_data = np.flip(arrival_data, 0)
 arrival_data = np.swapaxes(arrival_data,0,2)
 
 # generate grid    
@@ -87,14 +135,17 @@ X, Y, Z = np.meshgrid(np.linspace(dy/2, (ncol-2)*dy+dy/2, num=(ncol+1)), \
                       np.linspace(dx/2, (nrow-2)*dx+dx/2, num=(nrow+1)))
 
 
-angle = -25
+angle = -30
 fig = plt.figure(figsize=(12, 9), dpi=300)
 ax = fig.gca(projection='3d')
-ax.view_init(25, angle)
+ax.view_init(30, angle)
 # ax.set_aspect('equal') 
 
-    
-norm = matplotlib.colors.Normalize(vmin=arrival_data.min().min(), vmax=arrival_data.max().max())
+# if n==0: 
+# norm = matplotlib.colors.Normalize(vmin=arrival_data.min().min(), vmax=arrival_data.max().max())
+# norm = matplotlib.colors.Normalize(vmin=np.percentile(arrival_data[arrival_data != 0],2.1), vmax=np.percentile(arrival_data[arrival_data != 0],99.1))
+norm = matplotlib.colors.Normalize(vmin=-0.19, vmax=0.19)
+    # norm = matplotlib.colors.Normalize(vmin=0, vmax=0.5)
     
 # ax.voxels(filled, facecolors=facecolors, edgecolors='gray', shade=False)
 ax.voxels(X, Y, Z, arrival_data, facecolors=plt.cm.PiYG(norm(arrival_data)), \
@@ -103,6 +154,18 @@ ax.voxels(X, Y, Z, arrival_data, facecolors=plt.cm.PiYG(norm(arrival_data)), \
 m = cm.ScalarMappable(cmap=plt.cm.PiYG, norm=norm)
 m.set_array([])
 # format colorbar
+# format colorbar
+# divider = make_axes_locatable(ax)
+# cbar = plt.colorbar(m,shrink=0.3,pad=-0.148,ticks=None)
+# # cbar.outline.set_linewidth(0.5)
+# # for t in cbar.ax.get_yticklabels():
+# #      t.set_fontsize(fs-1.5)
+# # cbar.ax.yaxis.get_offset_text().set(size=fs-1.5)
+# cbar.set_label('Pore Volumes', fontsize=fs, **hfont)
+# tick_locator = ticker.MaxNLocator(nbins=6)
+# cbar.locator = tick_locator
+# cbar.update_ticks()
+
 divider = make_axes_locatable(ax)
 # cax = divider.append_axes("right", pad=0.05)
 # cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -110,7 +173,8 @@ plt.colorbar(m, shrink=0.5)
 set_axes_equal(ax)
 # ax.set_xlim3d([0, 4])
 ax.set_axis_off()
-
+PV = (i*tstep/60*q)/total_PV
+plt.title('PV = ' + str(PV))
 # invert z axis for matrix coordinates
 ax.invert_zaxis()
 # Set background color to white (grey is default)
@@ -118,5 +182,6 @@ ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 # ax.grid(False)
-
+# plt.savefig(data_filename[:5] + str(i) + '.svg', format="svg")
 plt.show()
+# n+=1

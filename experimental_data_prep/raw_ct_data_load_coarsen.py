@@ -46,14 +46,26 @@ import matplotlib.pyplot as plt
 # core_min =500
 
 # Indiana
-path2dry = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data\\raw_ct\\indiana'
-filename_root = 'Indiana_dry_392_392_120_16b.raw'
+# path2dry = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data\\raw_ct\\indiana'
+# filename_root = 'Indiana_dry_392_392_120_16b.raw'
+# dry_list = [1]
+# img_dim = [392, 392, 120]
+# vox_size = [0.012, 0.012, 0.1]
+# coarse_vox_size = [0.012*8, 0.012*8, 0.1]
+# #end crop: Dry[:,:,7:-12]
+# coarse_factor = 8
+# core_max = 2100
+# core_min =500
+
+# Ketton
+path2dry = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data\\raw_ct\\ketton'
+filename_root = 'Ketton_dry_106_106_105_16b.raw'
 dry_list = [1]
-img_dim = [392, 392, 120]
-vox_size = [0.012, 0.012, 0.1]
-coarse_vox_size = [0.012*8, 0.012*8, 0.1]
-#end crop: Dry[:,:,7:-12]
-coarse_factor = 8
+img_dim = [106, 106, 105]
+vox_size = [0.046875, 0.046875, 0.1] #cm
+coarse_vox_size = [0.046875*2, 0.046875*2, 0.1]
+#end crop: Dry[:,:,4:102]
+coarse_factor = 2
 core_max = 2100
 core_min =500
 
@@ -112,18 +124,19 @@ def coarsen_slices(array3d, coarseness):
 
 Dry = load_average_data(path2dry, dry_list, filename_root, img_dim)
 # crop ends
-Dry = Dry[:,:,7:-12]
+Dry = Dry[:,:,4:102]
 
 Dry_coarse = coarsen_slices(Dry, coarse_factor)
 
 # Try normalizing CT data to porosity range
 # core_min = Dry_coarse[10:28, 10:28, :].min()
-core_min = Dry_coarse[20:33,20:33, :].min()
+# core_min = Dry_coarse[20:33,20:33, :].min()
+core_min = 1500
 
 # plot_2d(data[:,77,:], vox_size[2], vox_size[0], 'HU', cmap='gray')
 plot_2d(Dry_coarse[:,25,:], coarse_vox_size[2], coarse_vox_size[0], 'HU', cmap='gray')
 plt.clim(core_min,core_max)
-plot_2d(Dry[:,25*8,:], vox_size[2], vox_size[0], 'HU', cmap='gray')
+plot_2d(Dry[:,25*coarse_factor,:], vox_size[2], vox_size[0], 'HU', cmap='gray')
 plt.clim(core_min,core_max)
 
 
@@ -139,6 +152,6 @@ plot_2d(por_guess[:,25,:], vox_size[2], coarse_vox_size[0], '[-]', cmap='viridis
 
 data_size = por_guess.shape
 
-save_filename = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data'  + '\\' 'Indiana_scaled_CT_coarsened.csv'
+save_filename = 'D:\\Dropbox\\Codes\\Deep_learning\\Neural_network_inversion\\experimental_data_prep\\pet_data'  + '\\' 'Ketton_scaled_CT_coarsened.csv'
 save_data = np.append(por_guess.flatten('C'), [data_size, coarse_vox_size])
 np.savetxt(save_filename, save_data, delimiter=',')
