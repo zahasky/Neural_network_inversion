@@ -17,6 +17,11 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from matplotlib import rc
+rc('font',**{'family':'serif','serif':['Arial']})
+fs = 14
+plt.rcParams['font.size'] = fs
+
 
 def set_axes_equal(ax):
     '''Make axes of 3D plot have equal scale so that spheres appear as spheres,
@@ -54,7 +59,10 @@ def half_core(data):
 
 
 # Import arrival time data
-arrival_data_filename = 'Berea_C1_2ml_2_3mm_at_norm' 
+# arrival_data_filename = 'Berea_C1_2ml_2_3mm_at_norm' 
+data_filename = 'Berea_C1_2ml_2_3mm_at'
+# data_filename = 'Berea_C1_2ml_2_3mm_at_norm_nodiff'
+
 # arrival_data_filename = 'Berea_C1_1ml_2_3mm_at_norm' 
 # arrival_data_filename = 'Indiana_2ml_2_3mm_at_norm' 
 # arrival_data_filename = 'Ketton_3ml_2_3mm_at_norm'
@@ -63,7 +71,7 @@ arrival_data_filename = 'Berea_C1_2ml_2_3mm_at_norm'
 
 data_dir_arrival = os.path.join('.', 'pet_arrival_time_data')
 # Import data
-arrival_data = np.loadtxt(data_dir_arrival + '\\' + arrival_data_filename + '.csv', delimiter=',')
+arrival_data = np.loadtxt(data_dir_arrival + '\\' + data_filename + '.csv', delimiter=',')
 
 arrival_data = arrival_data[0:-1]
 nslice = 40
@@ -142,16 +150,16 @@ ax.view_init(30, angle)
 # ax.set_aspect('equal') 
 
 # if n==0: 
-# norm = matplotlib.colors.Normalize(vmin=arrival_data.min().min(), vmax=arrival_data.max().max())
+norm = matplotlib.colors.Normalize(vmin=arrival_data.min().min(), vmax=arrival_data.max().max())
 # norm = matplotlib.colors.Normalize(vmin=np.percentile(arrival_data[arrival_data != 0],2.1), vmax=np.percentile(arrival_data[arrival_data != 0],99.1))
-norm = matplotlib.colors.Normalize(vmin=-0.19, vmax=0.19)
+# norm = matplotlib.colors.Normalize(vmin=-0.19, vmax=0.19)
     # norm = matplotlib.colors.Normalize(vmin=0, vmax=0.5)
     
 # ax.voxels(filled, facecolors=facecolors, edgecolors='gray', shade=False)
-ax.voxels(X, Y, Z, arrival_data, facecolors=plt.cm.PiYG(norm(arrival_data)), \
+ax.voxels(X, Y, Z, arrival_data, facecolors=plt.cm.YlGn(norm(arrival_data)), \
           edgecolors='grey', linewidth=0.2, shade=False, alpha=0.7)
 
-m = cm.ScalarMappable(cmap=plt.cm.PiYG, norm=norm)
+m = cm.ScalarMappable(cmap=plt.cm.YlGn, norm=norm)
 m.set_array([])
 # format colorbar
 # format colorbar
@@ -173,8 +181,8 @@ plt.colorbar(m, shrink=0.5)
 set_axes_equal(ax)
 # ax.set_xlim3d([0, 4])
 ax.set_axis_off()
-PV = (i*tstep/60*q)/total_PV
-plt.title('PV = ' + str(PV))
+# PV = (i*tstep/60*q)/total_PV
+# plt.title('PV = ' + str(PV))
 # invert z axis for matrix coordinates
 ax.invert_zaxis()
 # Set background color to white (grey is default)
@@ -182,6 +190,7 @@ ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 # ax.grid(False)
-# plt.savefig(data_filename[:5] + str(i) + '.svg', format="svg")
+i=1
+plt.savefig(data_filename[:5] + str(i) + 'at.svg', format="svg")
 plt.show()
 # n+=1
