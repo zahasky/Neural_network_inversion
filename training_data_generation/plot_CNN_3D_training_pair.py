@@ -13,7 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 # training data iteration
-td = 8
+td = 25980
 
 
 # layer to plot
@@ -32,7 +32,8 @@ grid_size = [0.25, 0.25, 0.25] # selected units [cm]
 # LOAD SELECTED EXAMPLE DATA 
 # =============================================================================
 # Set path to perm maps
-perm_field_dir = os.path.join('.', '3D_fields\\examples')
+# perm_field_dir = os.path.join('.', '3D_fields\\examples')
+perm_field_dir = 'C:\\Users\\Czahasky\\Box Sync\\Training_data\\3D_data\\tdata_python26k_new_mask\\syn_core_perm_maps_new_mask'
 
 # Set path to training data output
 workdir = os.path.join('.', '3D_fields\\examples')
