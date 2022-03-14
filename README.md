@@ -11,7 +11,7 @@ An example of the inversion output for a Berea sandstone core is illustrated bel
 </p>
 
 ### Workflow
-The following is the schematic illustration of the inversion-validation workflow using both synthetic (top loop) and experimental PET data (bottom loop). The purple blocks correspond to synthetic/predicted permeability maps, the red block is the PET data, the orange blocks are experimental and modeled arrival time difference maps. The CNN components include convolutional blocks (blue), up/down-sampling block (yellow), and residual-in-residual dense blocks (green).
+The figure belwo is a schematic illustration of the inversion-validation workflow using both synthetic (top loop) and experimental PET data (bottom loop). The purple blocks correspond to synthetic/predicted permeability maps, the red block is the PET data, the orange blocks are experimental and modeled arrival time difference maps. The CNN components include convolutional blocks (blue), up/down-sampling block (yellow), and residual-in-residual dense blocks (green).
 
 
 The network training was a supervised process. The inputs were 3-D image tensors containing the arrival time difference maps (<img src="./CNN_final_version/Figures/y.gif"></img>) and the permeability maps of the corresponding synthetic geologic core were the target data (<img src="./CNN_final_version/Figures/x.gif"></img>). The predicted permeability maps (<img src="./CNN_final_version/Figures/x_hat.gif"></img>) were compared with the target synthetic permeability maps through loss functions. Training accuracy was evaluated on the test set by individually comparing each synthetic permeability map with the network predicted permeability map or by comparing the experimental arrival time difference maps and the modeled arrival time difference maps (<img src="./CNN_final_version/Figures/yhat.gif"></img>) based on the network permeability map prediction.
@@ -23,6 +23,7 @@ The network training was a supervised process. The inputs were 3-D image tensors
 The following is a <a href="https://github.com/zahasky/Neural_network_inversion/blob/master/CNN_final_version/jupyter_workflow/LoopValidation.ipynb">jupyter notebook</a> demonstrating the overall workflow. Since the jupyter notebook reads files a bit differently than the normal IDE, please use the file in the jupyter_workflow folder. 
 
 ### Citation
+If you use any of the associated data, codes, or models, the paper the desribes this work can be cited using the following bibtex entry.
 ```
 @article{article,
 author = {Huang, Zitong and Kurotori, Takeshi and Pini, Ronny and Benson, S. and Zahasky, Christopher},
