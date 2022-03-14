@@ -1,6 +1,6 @@
 ## Three-Dimensional Permeability Inversion Using Convolutional Neural Networks and Positron Emission Tomography
 <p align="center">
-<img src="./figures/workflow_figv2.jpg" width="500px"></img>
+<img src="./Figures/workflow_figv2.jpg" width="500px"></img>
 </p>
 
 The first step in understanding how water and contaminants are flowing in the subsurface is to describe the ease at which fluid can flow—a hydrogeologic property termed permeability. Variation in permeability is an intrinsic property of geologic materials that arises due to differences in the underlying geologic processes that generated the materials. Recent utilization of in situ imaging, specifically positron emission tomography (PET), enables the measurement of three-dimensional (3-D) time-lapse radiotracer solute transport in geologic porous media. 
