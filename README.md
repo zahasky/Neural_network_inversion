@@ -20,7 +20,7 @@ The network training was a supervised process. The inputs were 3-D image tensors
 </p>
 
 ### Example
-The following is a <a href="https://github.com/zahasky/Neural_network_inversion/blob/master/CNN_final_version/jupyter_workflow/LoopValidation.ipynb">jupyter notebook</a> demonstrating the overall workflow. Since the jupyter notebook reads files a bit differently than some IDEs, please use the files in the jupyter_workflow folder to run the workflow. 
+The following is a <a href="https://github.com/zahasky/Neural_network_inversion/blob/master/CNN_final_version/jupyter_workflow/LoopValidation.ipynb">jupyter notebook</a> demonstrating the overall workflow. Since jupyter notebook reads files a bit differently than some IDEs, please use the files in the jupyter_workflow folder to run the workflow. 
 
 ### Citation
 If you use any of the associated data, codes, or models, the paper that desribes this work can be cited using the following bibtex entry.
