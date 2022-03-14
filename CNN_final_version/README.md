@@ -15,3 +15,4 @@ The network training was a supervised process. The inputs were 3-D image tensors
 <img src="./Figures/workflow_figv2.jpg" width="800px"></img>
 </p>
 $\hat{x}$
+$\sum_{i=1}^n X_i$
