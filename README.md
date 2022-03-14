@@ -7,7 +7,7 @@ Leveraging the relationship between local permeability variation and solute adve
 
 An example of the inversion output for a Berea sandstone core is illustrated below.
 <p align="center">
-<img src="./CNN_final_version/Figures/f7.jpg" width="800px"></img>
+<img src="./CNN_final_version/Figures/f9_Ber.jpg" width="800px"></img>
 </p>
 
 ### Workflow
