@@ -19,3 +19,16 @@ The network training was a supervised process. The inputs were 3-D image tensors
 
 ### Example
 The following is a <a href="https://github.com/zahasky/Neural_network_inversion/blob/master/CNN_final_version/jupyter_workflow/LoopValidation.ipynb">jupyter notebook</a> demonstrating the overall workflow. Since the jupyter notebook reads files a bit differently than the normal IDE, please use the file in the jupyter_workflow folder. 
+
+### Citation
+```
+@article{article,
+author = {Huang, Zitong and Kurotori, Takeshi and Pini, Ronny and Benson, S. and Zahasky, Christopher},
+year = {2022},
+month = {03},
+pages = {},
+title = {Three‐Dimensional Permeability Inversion Using Convolutional Neural Networks and Positron Emission Tomography},
+journal = {Water Resources Research},
+doi = {10.1029/2021WR031554}
+}
+```
