@@ -14,3 +14,4 @@ The network training was a supervised process. The inputs were 3-D image tensors
 <p align="center">
 <img src="./Figures/workflow_figv2.jpg" width="800px"></img>
 </p>
+$\hat{x}$
