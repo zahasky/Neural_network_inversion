@@ -16,3 +16,6 @@ The network training was a supervised process. The inputs were 3-D image tensors
 <img src="./Figures/workflow_figv2.jpg" width="800px"></img>
 </p>
 
+### Example
+The following is a <a href="https://doi.org/10.1029/2021WR031554">jupyter notebook</a> demonstrating the overall workflow. Since the jupyter notebook reads file a bit differently than the normal IDE, please use the file in the jupyter_workflow folder. 
+
