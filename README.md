@@ -32,7 +32,7 @@ month = {03},
 pages = {},
 title = {Three‐Dimensional Permeability Inversion Using Convolutional Neural Networks and Positron Emission Tomography},
 journal = {Water Resources Research},
-volume = {56},
+volume = {58},
 doi = {10.1029/2021WR031554}
 }
 ```
